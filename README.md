@@ -1,4 +1,4 @@
-# summarization-toolbox
+# Summarization Toolbox
 
 ## Installation
 
