@@ -6,6 +6,10 @@ __pycache__/
 # C extensions
 *.so
 
+# direnv
+.envrc
+.direnv
+
 # Distribution / packaging
 .Python
 build/
