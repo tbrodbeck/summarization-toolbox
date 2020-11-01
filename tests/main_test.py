@@ -10,9 +10,12 @@ class TestDataProvider(unittest.TestCase):
     for datasetName in o.DATASET_NAMES:
       for tokenizerName in o.TOKENIZER_NAMES:
         o.DataProvider(datasetName, tokenizerName)
+
     self.assertRaises(ValueError, o.DataProvider, o.TOKENIZER_NAMES[0], o.DATASET_NAMES[0], 1)
 
     # no impossible input
     self.assertRaises(ValueError, o.DataProvider, 'unknown', o.DATASET_NAMES[0])
     self.assertRaises(ValueError, o.DataProvider, o.TOKENIZER_NAMES[0], 'unknown')
     self.assertRaises(ValueError, o.DataProvider, o.TOKENIZER_NAMES[0], o.DATASET_NAMES[0], -1)
+
+    dataProvider = o.DataProvider('golem', o.TOKENIZER_NAMES[0], createSplits=(0.8, 0.5))
