@@ -1,9 +1,11 @@
+import sys
+sys.path.append(".")
 import fire
 from timelogging.timeLog import log
 import torch
 import transformers
 from typing import Dict, List
-from .gerneral_io_utils import read_single_txt, write_txt
+from utilities.gerneral_io_utils import read_single_txt, write_txt
 
 DATASET_NAMES = ['golem', 'xsum', 'cnn/dailymail']
 SPLIT_NAMES = ['train', 'val', 'test']

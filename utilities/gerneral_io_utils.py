@@ -111,7 +111,6 @@ def read_single_txt(file_path: str) -> List[str]:
   """
   read text/lines from
   a single text file
-  :param limit:
   :param file_path:
   """
   if not os.path.isfile(file_path):  # check if correct files exist
@@ -150,7 +149,7 @@ def read_config(config_path: str):
     return path, model, pipe
 
 
-def check_make_dir(dir_or_file: str, create_dir: bool = True) -> bool:
+def check_make_dir(dir_or_file: str, create_dir: bool = False) -> bool:
     """
     - check if file exists
     - check if directory exist
