@@ -14,14 +14,14 @@ def provideData(datasetName: str, tokenizerName: str, size: int = None, createSp
   """Provides tokenized data for training
 
   Args:
-      datasetName (str)
-      tokenizerName (str)
-      size (int, optional): Defaults to None.
-      createSplits (Dict, optional): Split the dataset into train, validation and test splits. Defaults to None.
-      splits2tokenize (List, optional): Can be set to only tokenize certain splits. Defaults to SPLIT_NAMES.
+    datasetName (str)
+    tokenizerName (str)
+    size (int, optional): Defaults to None.
+    createSplits (Dict, optional): Split the dataset into train, validation and test splits. Defaults to None.
+    splits2tokenize (List, optional): Can be set to only tokenize certain splits. Defaults to SPLIT_NAMES.
 
   Raises:
-      ValueError: incorrect inputs"""
+    ValueError: incorrect inputs"""
   # check input
   if not datasetName in DATASET_NAMES:
     raise ValueError('unkown dataset')
@@ -60,7 +60,7 @@ def provideData(datasetName: str, tokenizerName: str, size: int = None, createSp
     if size:
       text = text[:size]
     tokenizer = transformers.AutoTokenizer.from_pretrained(tokenizerName)
-    log(f'creating batch {textName} for {splitName}')
+    log(f'creating {textName} batch for {splitName}')
     pt_batch = tokenizer(
       text,
       padding=True,

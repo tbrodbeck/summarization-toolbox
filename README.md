@@ -12,11 +12,14 @@ Provides tokenized data for training. Use it with like this:
 
 ### Synopsis
 
-`python -m dataProvider.main DATASETNAME TOKENIZERNAME <flags>`
+```
+python -m dataProvider.main DATASETNAME TOKENIZERNAME <flags>
+```
 
 ### Positional Arguments
 
 `DATASETNAME`
+
 `TOKENIZERNAME`
 
 ### Flags
