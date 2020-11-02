@@ -8,27 +8,32 @@ pip install -r requirements.txt
 
 ## Data Provider
 
+Provides tokenized data for training.
+
 Call it with `python -m dataProvider.main` like this:
 
-SYNOPSIS
+### Synopsis
+
 `python -m dataProvider.main DATASETNAME TOKENIZERNAME <flags>`
 
-DESCRIPTION
-Provides tokenized data for training
+### Positional Arguments
 
-POSITIONAL ARGUMENTS
 `DATASETNAME`
 `TOKENIZERNAME`
 
-FLAGS
+### Flags
+
 `--size=SIZE`
 Defaults to None.
+
 `--createSplits=CREATESPLITS`
 Split the dataset into train, validation and test splits. Defaults to None.
+
 `--splits2tokenize=SPLITS2TOKENIZE`
 Can be set to only tokenize certain splits. Defaults to SPLIT_NAMES.
 
-NOTES
+### Notes
+
 You can also use flags syntax for POSITIONAL ARGUMENTS
 
 ## Development Instructions
