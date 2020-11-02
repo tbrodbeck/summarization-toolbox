@@ -116,7 +116,7 @@ def read_single_txt(file_path: str) -> List[str]:
   """
   if not os.path.isfile(file_path):  # check if correct files exist
     raise FileNotFoundError(f'{file_path} not found')
-  log("\nRead", file_path)
+  log("Read", file_path)
   with open(file_path, mode="r", encoding="utf-8") as file_handle:
       text = file_handle.readlines()
       lines = [line.rstrip('\n') for line in text]
