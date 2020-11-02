@@ -8,9 +8,7 @@ pip install -r requirements.txt
 
 ## Data Provider
 
-Provides tokenized data for training.
-
-Call it with `python -m dataProvider.main` like this:
+Provides tokenized data for training. Use it with like this:
 
 ### Synopsis
 
