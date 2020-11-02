@@ -1,50 +1,73 @@
-import os
+import fire
 from timelogging.timeLog import log
-import typing
+import torch
+import transformers
+from typing import Dict, List
+from .gerneral_io_utils import read_single_txt, write_txt
 
 DATASET_NAMES = ['golem', 'xsum', 'cnn/dailymail']
-TOKENIZER_NAMES = ['t5Tokenizer']
+SPLIT_NAMES = ['train', 'val', 'test']
+TOKENIZER_NAMES = ['WikinewsSum/t5-base-multi-de-wiki-news']
+TEXT_NAMES = ['source', 'target']
 
-class DataProvider():
-  def __init__(self, datasetName: str, tokenizerName: str, size: int = None, createSplits: typing.Tuple = None):
-    # check input
-    if not datasetName in DATASET_NAMES:
-      raise ValueError('unkown dataset')
-    if not tokenizerName in TOKENIZER_NAMES:
-      raise ValueError('unkown tokenizer')
-    if size and size < 1:
-      raise ValueError('wrong size')
-    if datasetName == 'golem':
-      dataDir = 'dataProvider/datasets/golem/'
-    if createSplits:
-      sourceFile = dataDir + 'source.txt'
-      targetFile = dataDir + 'target.txt'
-      if not os.path.isfile(sourceFile) or not os.path.isfile(targetFile):  # check if correct files exist
-        raise ValueError(f'{sourceFile} or {targetFile} not found')
-      splitNames = ['train', 'val', 'test']
-      for i, splitFraction in enumerate(createSplits):
+def provideData(datasetName: str, tokenizerName: str, size: int = None, createSplits: Dict = None, splits2tokenize: List = SPLIT_NAMES):
+  """Provides tokenized data for training
+
+  Args:
+      datasetName (str)
+      tokenizerName (str)
+      size (int, optional): Defaults to None.
+      createSplits (Dict, optional): Split the dataset into train, validation and test splits. Defaults to None.
+      splits2tokenize (List, optional): Can be set to only tokenize certain splits. Defaults to SPLIT_NAMES.
+
+  Raises:
+      ValueError: incorrect inputs"""
+  # check input
+  if not datasetName in DATASET_NAMES:
+    raise ValueError('unkown dataset')
+  if not tokenizerName in TOKENIZER_NAMES:
+    raise ValueError('unkown tokenizer')
+  if size and size < 1:
+    raise ValueError('wrong size')
+
+  # retrieve dataset
+  if datasetName == 'golem':
+    dataDir = 'dataProvider/datasets/golem/'
+
+  if createSplits:
+    data = {}
+    data['source'] = read_single_txt(dataDir + 'source.txt')
+    data['target'] = read_single_txt(dataDir + 'target.txt')
+    entries = len(data['source'])
+    assert entries == len(data['target']), "Source and target must have the same amount of lines"
+    for textName in TEXT_NAMES:
+      text = data[textName]
+      previousSplitIndex = 0
+      createSplits['test'] = 1.
+      for splitName in SPLIT_NAMES:
+        splitFraction = createSplits[splitName]
         if not 0 <= splitFraction <= 1:  # check split values
           raise ValueError('incorrect split sizes')
-        sourceFile = dataDir + '{}.source'.format(splitNames[i])
-        targetFile = dataDir + '{}.target'.format(splitNames[i])
-        if os.path.isfile(sourceFile) or os.path.isfile(targetFile):  # check if correct files are not existent yet
-          raise ValueError(f'{sourceFile} or {targetFile} not found')
+        splitIndex = int((entries - previousSplitIndex) * splitFraction + previousSplitIndex)
+        split = text[previousSplitIndex:splitIndex]
+        write_txt('{}{}.{}'.format(dataDir, splitName, textName), split)
+        previousSplitIndex = splitIndex
+      assert previousSplitIndex == entries, f'{previousSplitIndex} != {entries}'
 
-  def read_single_txt(file_path: str, limit: int = None) -> typing.List[str]:
-    """
-    read text/lines from
-    a single text file
-    :param limit:
-    :param file_path:
-    :return:
-    """
-    lines = list()
-    log("\nRead", file_path)
-    with open(file_path, mode="r", encoding="utf-8") as file_handle:
-        text = file_handle.readlines()
-        lines = [line.rstrip('\n') for line in text]
+  for textName in TEXT_NAMES:  # tokenize
+   for splitName in splits2tokenize:
+    text = read_single_txt('{}{}.{}'.format(dataDir, splitName, textName))
+    if size:
+      text = text[:size]
+    tokenizer = transformers.AutoTokenizer.from_pretrained(tokenizerName)
+    log(f'creating batch {textName} for {splitName}')
+    pt_batch = tokenizer(
+      text,
+      padding=True,
+      truncation=True,
+      return_tensors="pt"
+    )
+    torch.save(pt_batch, '{}{}_{}.pt'.format(dataDir, splitName, textName))
 
-    if limit:
-        lines = lines[:limit]
-
-    return lines
+if __name__ == "__main__":
+  fire.Fire(provideData)
