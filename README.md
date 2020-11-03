@@ -66,7 +66,16 @@ You can also use flags syntax for POSITIONAL ARGUMENTS
 
 ### Output
 
-The resulting tokenized [PyTorch](https://pytorch.org/) tensors are saved in the `dataProvider/datasets/$DATASETNAME/tensors` directory.
+The resulting tokenized [PyTorch](https://pytorch.org/) tensors are saved in the `dataProvider/datasets/$DATASETNAME/tensors` directory as the following files:
+
+```
+train_source.pt
+train_target.pt
+val_source.pt
+val_target.pt
+test_source.pt
+test_target.pt
+```
 
 ## Development Instructions
 
