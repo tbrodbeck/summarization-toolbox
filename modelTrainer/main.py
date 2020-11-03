@@ -36,7 +36,23 @@ TEXT_NAMES = [
     'target'
 ]
 
-MODEL_CONFIG = []
+# required parameters
+# for model
+MODEL_CONFIG = [
+    "language",
+    "version",
+    "status",
+    "freezed_components",
+    "output_directory"
+]
+
+# required parameters
+# for training
+TRAINING_CONFIG = [
+    "epochs",
+    "train_batch_size",
+    "val_batch_size"
+]
 
 DATA_DIRECTORY = "./dataProvider/datasets/"
 
@@ -72,13 +88,18 @@ if __name__ == '__main__':
     assert dataset_name in dataset_names, \
         f"'{dataset_name}' not in available datasets: {dataset_names}"
 
+    # check tensors folder
     dataset_dir = os.path.join(DATA_DIRECTORY, dataset_name)
-    data_files = [file for file in os.listdir(dataset_dir)
+    assert check_make_dir(dataset_dir + "/tensors"), \
+        f"No 'tensors' folder in '{dataset_dir}'"
+
+    tensor_dir = os.path.join(dataset_dir, "tensors")
+    data_files = [file for file in os.listdir(tensor_dir)
                   if '.pt' in file]
 
     # check training files
     assert len(data_files) > 0, \
-        f"'{dataset_dir}' is empty! Please provide '.pt' files!"
+        f"'{tensor_dir}' is empty! Please provide '.pt' files!"
 
     data_dict = dict()
     for split_name in SPLIT_NAMES:
@@ -88,13 +109,13 @@ if __name__ == '__main__':
 
         if files:
             # check data file pairs
-            assert all([check_make_dir(dataset_dir + "/" + file) for file in files]), \
+            assert all([check_make_dir(tensor_dir + "/" + file) for file in files]), \
                 f"'{files[0]}'/'{files[0]}' pair doesn't exist in '{dataset_dir}'!"
 
             data_dict[split_name] = dict()
             for text_name in TEXT_NAMES:
                 file_path = os.path.join(
-                    dataset_dir,
+                    tensor_dir,
                     f"{split_name}_{text_name}.pt"
                 )
 
@@ -125,23 +146,23 @@ if __name__ == '__main__':
     ###################################
     # Read from config
     ###################################
-    MODEL = read_config(
+    MODEL, TRAINING = read_config(
         config_path
     )
 
     # model parameters
-    parameters = dict()
+    model_parameters = dict()
     for parameter_name in MODEL_CONFIG:
         if MODEL[parameter_name]:
-            parameters[parameter_name] = MODEL[parameter_name]
+            model_parameters[parameter_name] = MODEL[parameter_name]
 
-    log("Received parameters:")
-    for p in parameters:
-        log(f"{p}: {parameters[p]}")
+    log("Received parameters for model:")
+    for p in model_parameters:
+        log(f"{p}: {model_parameters[p]}")
 
     # check if output directory exists
-    if not check_make_dir(parameters["output_directory"], create_dir=True):
-        log(f"Created output directory'{parameters['output_directory']}'")
+    if not check_make_dir(model_parameters["output_directory"], create_dir=True):
+        log(f"Created output directory'{model_parameters['output_directory']}'")
 
     ###################################
     # Initialize Model
@@ -149,25 +170,32 @@ if __name__ == '__main__':
 
     # initialize summary model
     model = AbstractiveSummarizer(
-        parameters["language"],
-        parameters["status"],
-        parameters["output_path"],
-        parameters["version"],
-        parameters["freezed_components"]
+        model_parameters["language"],
+        model_parameters["status"],
+        model_parameters["output_directory"],
+        model_parameters["version"],
+        model_parameters["freezed_components"]
     )
 
     ###################################
     # Run fine tuning
     ###################################
 
+    # training parameters
+    training_parameters = dict()
+    for parameter_name in TRAINING_CONFIG:
+        if TRAINING[parameter_name]:
+            training_parameters[parameter_name] = TRAINING[parameter_name]
+
+    log("Received parameters for training:")
+    for p in training_parameters:
+        log(f"{p}: {training_parameters[p]}")
+
     log("\n+++ FINE-TUNING +++")
 
     fine_tune_model(
         model,
-        parameters["input_path"],
-        parameters["output_path"],
-        parameters["corpus_file"],
-        parameters["target_file"],
-        int(parameters["batch_size"]),
-        parameters["freezed_components"]
+        model_parameters["output_directory"],
+        data_dict,
+        training_parameters
     )

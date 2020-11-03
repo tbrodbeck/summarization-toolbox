@@ -5,12 +5,13 @@ using the T5 model
 
 import os
 import spacy
+from timelogging.timeLog import log
 from typing import Dict, Tuple
 from transformers import AutoModelWithLMHead, AutoTokenizer, AutoConfig
 import torch
 from utilities.gerneral_io_utils import check_make_dir
 from utilities.cleaning_utils import truncate_incomplete_sentences
-from utilities.other_utils import printout
+
 
 
 class AbstractiveSummarizer:
@@ -24,7 +25,7 @@ class AbstractiveSummarizer:
         """
         self.base_path = base_path
         if not check_make_dir(self.base_path, create_dir=True):
-            printout(f"directory {self.base_path} was created")
+            log(f"directory {self.base_path} was created")
 
         self.version = str(version)
 
@@ -73,7 +74,7 @@ class AbstractiveSummarizer:
             self.device = torch.device("cuda")
         else:
             self.device = torch.device("cpu")
-        printout(f"{self.device} available")
+        log(f"{self.device} available")
 
         # freeze layers not to train
         if freezed_layers:
@@ -105,7 +106,7 @@ class AbstractiveSummarizer:
         else:
             self.model.train()
 
-        printout(f"set model to {mode} mode")
+        log(f"set model to {mode} mode")
 
 
     def set_args(self) -> Tuple[Dict, Dict]:
@@ -150,7 +151,7 @@ class AbstractiveSummarizer:
                         self.version
                     )
                     if check_make_dir(model_path, create_dir=False):
-                        printout(f"initialize with model from directory: {model_path}")
+                        log(f"initialize with model from directory: {model_path}")
                     else:
                         versions = os.listdir(model_dir)
                         latest_version = max(versions)
@@ -159,15 +160,15 @@ class AbstractiveSummarizer:
                             self.short_name,
                             latest_version
                         )
-                        printout(f"version {self.version} not found! "
-                              f"chose latest version: {latest_version}", flag="reminder")
+                        log(f"version {self.version} not found! "
+                              f"chose latest version: {latest_version}")
 
                     model = AutoModelWithLMHead.from_pretrained(model_path)
             else:
-                printout(f"no pretrained models for {self.short_name}", flag="error")
+                log(f"no pretrained models for {self.short_name}")
                 exit()
         else:
-            printout(f"initialize with base model: {self.short_name}")
+            log(f"initialize with base model: {self.short_name}")
 
             # TODO: Enable loading model from config
             #model = AutoModelWithLMHead.from_config(self.config)
@@ -208,19 +209,7 @@ class AbstractiveSummarizer:
                 if model_component == 'lm_head':
                     self.model.lm_head.weight.requires_grad = False
                     self.model.lm_head.eval()
-                """if model_component == 'shared':
-                    for p in self.model.shared.parameters():
-                        p.requires_grad = False
-                if model_component == 'encoder':
-                    for p in self.model.encoder.embed_tokens.parameters():
-                        p.requires_grad = False
-                if model_component == 'decoder':
-                    for p in self.model.decoder.embed_tokens.parameters():
-                        p.requires_grad = False
-                if model_component == 'lm_head':
-                    for p in self.model.lm_head.parameters():
-                        p.requires_grad = False"""
-                printout(f"freezed {model_component} layers")
+                log(f"freezed {model_component} layers")
 
 
     def predict(self, text: str) -> str:
