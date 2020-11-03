@@ -33,7 +33,8 @@ def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int 
   assertDirExistent(dataDir)
 
   if createSplits:
-    # if
+    if createSplits == 'True':
+      createSplits = {'train': 0.8, 'val': 0.5}
     for splitKey in createSplits:
       if not splitKey in SPLIT_NAMES:
         raise ValueError(f'unkown key {splitKey} - createSplits has to be a dictionary containing the keys `train` and `val` and values between 0 and 1')
