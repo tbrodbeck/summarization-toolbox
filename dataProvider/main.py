@@ -2,14 +2,14 @@ import fire
 from timelogging.timeLog import log
 import torch
 import transformers
-from typing import Dict, List
+import typing
 from .gerneral_io_utils import assertDirExistent, assertFileInxestent, check_make_dir, read_single_txt, write_txt
 
 MODEL_NAMES = ['t5-base']
 SPLIT_NAMES = ['train', 'val', 'test']
 TOKENIZER_NAMES = ['WikinewsSum/t5-base-multi-de-wiki-news']
 
-def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int = None, createSplits: Dict = None, splits2tokenize: List = SPLIT_NAMES):
+def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int = None, createSplits=None, splits2tokenize: typing.List = SPLIT_NAMES):
   """Provides tokenized data for training
   Args:
     datasetName (str)
@@ -33,7 +33,7 @@ def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int 
   assertDirExistent(dataDir)
 
   if createSplits:
-    if createSplits == 'True':
+    if createSplits == True:
       createSplits = {'train': 0.8, 'val': 0.5}
     for splitKey in createSplits:
       if not splitKey in SPLIT_NAMES:
