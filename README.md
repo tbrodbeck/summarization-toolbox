@@ -8,31 +8,69 @@ pip install -r requirements.txt
 
 ## Data Provider
 
-Provides tokenized data for training. Use it with like this:
+Provides tokenized data for training.
 
-### Synopsis
+### Input
 
-`python -m dataProvider.main DATASETNAME TOKENIZERNAME <flags>`
+It requires to have a dataset in the `dataProvider/datasets/$DATASETNAME` directory. Either the dataset can be provided as single files or already split into a train, validation and test set. Each line in a file should represent a single example string.
 
-### Positional Arguments
+#### Providing a Single Dataset
 
-`DATASETNAME`
-`TOKENIZERNAME`
+The sources (full texts) for summarization should be provided in a `sources.txt` file and the target summarizations should be provided in a `targets.txt` file.
 
-### Flags
+Now the `--createSplits` flag has to be used to create the `train`, `val` and `test` files in that directory, which will then be the resource for the tokenization.
 
-`--size=SIZE`
-Defaults to None.
+#### Providing Train, Val and Test Split Files
 
-`--createSplits=CREATESPLITS`
-Split the dataset into train, validation and test splits. Defaults to None.
+If training, validation and test splits are already present, they should be provided in the following format of [🤗](https://github.com/huggingface/transformers/tree/master/examples/seq2seq).
 
-`--splits2tokenize=SPLITS2TOKENIZE`
-Can be set to only tokenize certain splits. Defaults to SPLIT_NAMES.
+```
+train.source
+train.target
+val.source
+val.target
+test.source
+test.target
+```
 
-### Notes
+### Usage
 
-You can also use flags syntax for POSITIONAL ARGUMENTS
+Use the Command Line Interface like this:
+
+```
+python -m dataProvider.main $DATASETNAME $TOKENIZERNAME $MODELNAME <flags>
+```
+
+#### Flags
+
+##### `--size=$SIZE`
+
+Defaults to `None`.
+
+##### `--createSplits=$CREATESPLITS`
+
+Split the dataset into train, validation and test splits. Defaults to `None`.
+
+`$CREATESPLITS` has to be a dictionary containing the keys `train` and `val` and values between 0 and 1. The value of `train` represents the ratio of the dataset that is used for training (and not for validation or testing). The value of `val` represents the the ratio between the validation and the test set.
+
+If the value of `$CREATESPLITS` is `True` it defaults to `{'train': 0.8, 'val': 0.5}`, which results a 80/10/10 split.
+
+##### `--splits2tokenize=$SPLITS2TOKENIZE`
+
+Can be set to only tokenize certain splits. Defaults to `[train, val, test]`.
+
+### Output
+
+The resulting tokenized [PyTorch](https://pytorch.org/) tensors are saved in the `dataProvider/datasets/$DATASETNAME/tensors` directory as the following files:
+
+```
+train_source.pt
+train_target.pt
+val_source.pt
+val_target.pt
+test_source.pt
+test_target.pt
+```
 
 ## Development Instructions
 
