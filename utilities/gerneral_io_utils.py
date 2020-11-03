@@ -151,11 +151,7 @@ def read_config(config_path: str):
         for entry in config_parser[section]:
             config_dict[section].update({entry: config_parser[section][entry]})
 
-    path = config_dict['PATH']
-    model = config_dict['MODEL']
-    pipe = config_dict['PIPELINE']
-
-    return path, model, pipe
+    return config_dict['MODEL'], config_dict['TRAINING']
 
 
 def check_make_dir(dir_or_file: str, create_dir: bool = False) -> bool:

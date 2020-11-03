@@ -3,12 +3,13 @@ this module provides all
 classes and functions to
 create a training data set
 """
-from typing import List, Tuple, Union
+from typing import Tuple, Union
 
+import torch
 from torch.utils.data import Dataset
 
 from sklearn.model_selection import train_test_split
-from model.abstractive_summarizer import AbstractiveSummarizer
+from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 
 
 class CustomDataset(Dataset):
@@ -88,16 +89,16 @@ class CustomTokenizer:
         return encodings
 
 
-def create_dataset(data: List[Tuple[str, str]], summary_model: AbstractiveSummarizer) \
-        -> Tuple[CustomDataset, CustomDataset]:
+def create_dataset(train_set: Tuple[torch.Tensor, torch.Tensor], val_set: Tuple[torch.Tensor, torch.Tensor] = None) \
+        -> Tuple[CustomDataset, Union[CustomDataset, None]]:
     """
     bring data in the right shape
     """
-    tokenizer = CustomTokenizer(summary_model.tokenizer)
-
-    train_set, val_set = tokenizer.split_and_tokenize(data)
 
     train_data_set = CustomDataset(*train_set)
-    val_data_set = CustomDataset(*val_set)
 
-    return train_data_set, val_data_set
+    if val_set:
+        val_data_set = CustomDataset(*val_set)
+        return train_data_set, val_data_set
+
+    return train_data_set, None
