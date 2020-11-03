@@ -13,18 +13,18 @@ class TestDataProvider(unittest.TestCase):
     #   for tokenizerName in o.TOKENIZER_NAMES:
     #     o.provideData(datasetName, tokenizerName)
 
-    self.assertRaises(ValueError, o.provideData, o.TOKENIZER_NAMES[0], o.DATASET_NAMES[0], o.MODEL_NAMES[0], 1)
+    self.assertRaises(ValueError, o.provideData, o.TOKENIZER_NAMES[0], 'dataset', o.MODEL_NAMES[0], 1)
 
     # no impossible input
-    self.assertRaises(ValueError, o.provideData, 'unknown', o.DATASET_NAMES[0], o.MODEL_NAMES[0])
+    self.assertRaises(ValueError, o.provideData, 'unknown', 'dataset', o.MODEL_NAMES[0])
     self.assertRaises(ValueError, o.provideData, o.TOKENIZER_NAMES[0], 'unknown', o.MODEL_NAMES[0])
-    self.assertRaises(ValueError, o.provideData, o.TOKENIZER_NAMES[0], o.DATASET_NAMES[0], 'unknown')
-    self.assertRaises(ValueError, o.provideData, o.TOKENIZER_NAMES[0], o.DATASET_NAMES[0], -1)
+    self.assertRaises(ValueError, o.provideData, o.TOKENIZER_NAMES[0], 'dataset', 'unknown')
+    self.assertRaises(ValueError, o.provideData, o.TOKENIZER_NAMES[0], 'dataset', -1)
 
-    dataset = 'golem'
-    # dataPath = f'dataProvider/datasets/{dataset}/'
-    # filesToDelete = glob.glob(f'{dataPath}*.source') + glob.glob(f'{dataPath}*.target')
-    # for filePath in filesToDelete:
-    #   os.remove(filePath)
-    # o.provideData(dataset, o.TOKENIZER_NAMES[0], o.MODEL_NAMES[0], createSplits={'train': 0.8, 'val': 0.5}, size=100)
-    o.provideData(dataset, o.TOKENIZER_NAMES[0], o.MODEL_NAMES[0], size=100)
+    # dataset = 'golem'
+    # # dataPath = f'dataProvider/datasets/{dataset}/'
+    # # filesToDelete = glob.glob(f'{dataPath}*.source') + glob.glob(f'{dataPath}*.target')
+    # # for filePath in filesToDelete:
+    # #   os.remove(filePath)
+    # # o.provideData(dataset, o.TOKENIZER_NAMES[0], o.MODEL_NAMES[0], createSplits={'train': 0.8, 'val': 0.5}, size=100)
+    # o.provideData(dataset, o.TOKENIZER_NAMES[0], o.MODEL_NAMES[0], size=100)

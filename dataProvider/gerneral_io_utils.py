@@ -10,6 +10,16 @@ from typing import List, Tuple, Union
 
 config_parser = ConfigParser()
 
+def assertDirExistent(path):
+    if not os.path.exists(path):
+        raise IOError(f'{path} does not exist')
+
+def assertFileInxestent(filePath):
+    """ assert if file is inexistent 
+    :param: filePath"""
+    if os.path.isfile(filePath):
+        raise FileExistsError(f'{filePath} found')
+
 def read_data(in_path: str, text_name: str = None, summary_name: str = None, limit: int = None):
     """
     general function which calls
@@ -148,7 +158,6 @@ def read_config(config_path: str):
 
     return path, model, pipe
 
-
 def check_make_dir(dir_or_file: str, create_dir: bool = True) -> bool:
     """
     - check if file exists
@@ -180,8 +189,7 @@ def write_txt(file_path: str, texts: List[str]):
   :param output_dir:
   :param texts:
   """
-  if os.path.isfile(file_path):  # check if correct files does not exist
-    raise FileExistsError(f'{file_path} found')
+  assertFileInxestent(file_path)
   with open(file_path, mode="w", encoding="utf-8") as file_handle:
       for text in texts:
           file_handle.write(text.rstrip("\n") + "\n")

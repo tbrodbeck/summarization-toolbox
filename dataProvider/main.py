@@ -3,13 +3,12 @@ from timelogging.timeLog import log
 import torch
 import transformers
 from typing import Dict, List
-from .gerneral_io_utils import read_single_txt, write_txt
+from .gerneral_io_utils import assertDirExistent, assertFileInxestent, check_make_dir, read_single_txt, write_txt
 
-DATASET_NAMES = ['golem', 'xsum', 'cnn/dailymail']
 MODEL_NAMES = ['t5-base']
 SPLIT_NAMES = ['train', 'val', 'test']
 TOKENIZER_NAMES = ['WikinewsSum/t5-base-multi-de-wiki-news']
-TEXT_NAMES = ['source', 'target']
+TEXT_NAMES = ['sources', 'targets']
 
 def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int = None, createSplits: Dict = None, splits2tokenize: List = SPLIT_NAMES):
   """Provides tokenized data for training
@@ -23,8 +22,6 @@ def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int 
   Raises:
     ValueError: incorrect inputs"""
   # checking input
-  if not datasetName in DATASET_NAMES:
-    raise ValueError('unkown dataset')
   if not modelName in MODEL_NAMES:
     raise ValueError('unkown model')
   if not tokenizerName in TOKENIZER_NAMES:
@@ -32,9 +29,9 @@ def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int 
   if size and size < 1:
     raise ValueError('wrong size')
 
-  # retrieving dataset
-  if datasetName == 'golem':
-    dataDir = 'dataProvider/datasets/golem/'
+  # connecting to dataset
+  dataDir = f'dataProvider/datasets/{datasetName}/'
+  assertDirExistent(dataDir)
 
   if createSplits:
     data = {}
@@ -59,6 +56,8 @@ def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int 
   # tokenizing
   tokenizer = transformers.AutoTokenizer.from_pretrained(tokenizerName)
   maxTokenSize = tokenizer.max_model_input_sizes[modelName]
+  tensorDir = f'{dataDir}tensors/'
+  check_make_dir(tensorDir, True)
   for splitName in splits2tokenize:
     sourceText = read_single_txt('{}{}.{}'.format(dataDir, splitName, 'source'))
     targetText = read_single_txt('{}{}.{}'.format(dataDir, splitName, 'target'))
@@ -88,7 +87,9 @@ def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int 
           del tokensList[i]
         tokensTensor = torch.LongTensor(tokensList[:maxTokenSize])
         shortTokens[key] = tokensTensor
-      torch.save(shortTokens, '{}{}_{}.pt'.format(dataDir, splitName, textName))
+      tensorPath = f'{tensorDir}{splitName}_{textName}.pt'
+      assertFileInxestent(tensorPath)
+      torch.save(shortTokens, tensorPath)
 
 if __name__ == "__main__":
   fire.Fire(provideData)
