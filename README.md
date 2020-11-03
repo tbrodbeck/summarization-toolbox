@@ -13,7 +13,7 @@ Provides tokenized data for training. Use it with like this:
 ### Synopsis
 
 ```
-python -m dataProvider.main DATASETNAME TOKENIZERNAME <flags>
+python -m dataProvider.main DATASETNAME TOKENIZERNAME MODELNAME <flags>
 ```
 
 ### Positional Arguments
@@ -21,6 +21,8 @@ python -m dataProvider.main DATASETNAME TOKENIZERNAME <flags>
 `DATASETNAME`
 
 `TOKENIZERNAME`
+
+`MODELNAME`
 
 ### Flags
 
