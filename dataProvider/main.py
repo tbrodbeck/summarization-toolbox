@@ -8,7 +8,6 @@ from .gerneral_io_utils import assertDirExistent, assertFileInxestent, check_mak
 MODEL_NAMES = ['t5-base']
 SPLIT_NAMES = ['train', 'val', 'test']
 TOKENIZER_NAMES = ['WikinewsSum/t5-base-multi-de-wiki-news']
-TEXT_NAMES = ['sources', 'targets']
 
 def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int = None, createSplits: Dict = None, splits2tokenize: List = SPLIT_NAMES):
   """Provides tokenized data for training
@@ -17,7 +16,7 @@ def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int 
     tokenizerName (str)
     modelName (str)
     size (int, optional): Defaults to None.
-    createSplits (Dict, optional): Split the dataset into train, validation and test splits. Defaults to None.
+    createSplits (Dict, optional): Split the dataset into train, validation and test splits. Defaults to None. Has to be provided as a dict containing the keys `train` and `val` and values between 0 and 1. If `True` uses a default 80/10/10 split.
     splits2tokenize (List, optional): Can be set to only tokenize certain splits. Defaults to SPLIT_NAMES.
   Raises:
     ValueError: incorrect inputs"""
@@ -34,12 +33,16 @@ def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int 
   assertDirExistent(dataDir)
 
   if createSplits:
+    # if
+    for splitKey in createSplits:
+      if not splitKey in SPLIT_NAMES:
+        raise ValueError(f'unkown key {splitKey} - createSplits has to be a dictionary containing the keys `train` and `val` and values between 0 and 1')
     data = {}
-    data['source'] = read_single_txt(dataDir + 'source.txt')
-    data['target'] = read_single_txt(dataDir + 'target.txt')
+    data['source'] = read_single_txt(dataDir + 'sources.txt')
+    data['target'] = read_single_txt(dataDir + 'targets.txt')
     entries = len(data['source'])
     assert entries == len(data['target']), "Source and target must have the same amount of lines"
-    for textName in TEXT_NAMES:
+    for textName in ['source', 'target']:
       text = data[textName]
       previousSplitIndex = 0
       createSplits['test'] = 1.
