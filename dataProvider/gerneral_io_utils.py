@@ -18,7 +18,7 @@ def assertFileInxestent(filePath):
     """ assert if file is inexistent 
     :param: filePath"""
     if os.path.isfile(filePath):
-        raise FileExistsError(f'{filePath} found')
+        raise FileExistsError(f'{filePath} already exists')
 
 def read_data(in_path: str, text_name: str = None, summary_name: str = None, limit: int = None):
     """

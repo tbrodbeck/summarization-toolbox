@@ -43,11 +43,11 @@ python -m dataProvider.main $DATASETNAME $TOKENIZERNAME $MODELNAME <flags>
 
 #### Positional Arguments
 
-`DATASETNAME`
-
-`TOKENIZERNAME`
-
-`MODELNAME`
+```
+$DATASETNAME
+$TOKENIZERNAME
+$MODELNAME
+```
 
 #### Flags
 
@@ -56,6 +56,10 @@ Defaults to None.
 
 `--createSplits=$CREATESPLITS`
 Split the dataset into train, validation and test splits. Defaults to None.
+
+`$CREATESPLITS` has to be a dictionary containing the keys `train` and `val` and values between 0 and 1. The value of `train` represents the ratio of the dataset that is used for training (and not for validation or testing). The value of `val` represents the the ratio between the validation and the test set.
+
+If the value of `$CREATESPLITS` is `True` it defaults to `{'train': 0.8, 'val': 0.5}`, which results a 80/10/10 split.
 
 `--splits2tokenize=$SPLITS2TOKENIZE`
 Can be set to only tokenize certain splits. Defaults to SPLIT_NAMES.
