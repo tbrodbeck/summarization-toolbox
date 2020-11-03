@@ -41,14 +41,6 @@ Use the Command Line Interface like this:
 python -m dataProvider.main $DATASETNAME $TOKENIZERNAME $MODELNAME <flags>
 ```
 
-#### Positional Arguments
-
-```
-$DATASETNAME
-$TOKENIZERNAME
-$MODELNAME
-```
-
 #### Flags
 
 ##### `--size=$SIZE`
@@ -66,10 +58,6 @@ If the value of `$CREATESPLITS` is `True` it defaults to `{'train': 0.8, 'val': 
 ##### `--splits2tokenize=$SPLITS2TOKENIZE`
 
 Can be set to only tokenize certain splits. Defaults to `[train, val, test]`.
-
-#### Notes
-
-You can also use flags syntax for POSITIONAL ARGUMENTS
 
 ### Output
 
