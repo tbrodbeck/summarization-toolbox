@@ -1,15 +1,17 @@
+import sys
+sys.path.append(".")
 import fire
 from timelogging.timeLog import log
 import torch
 import transformers
-import typing
-from .gerneral_io_utils import assertDirExistent, assertFileInxestent, check_make_dir, read_single_txt, write_txt
+from typing import List
+from utilities.gerneral_io_utils import read_single_txt, write_txt, assertDirExistent, assertFileInxestent, check_make_dir
 
 MODEL_NAMES = ['t5-base']
 SPLIT_NAMES = ['train', 'val', 'test']
 TOKENIZER_NAMES = ['WikinewsSum/t5-base-multi-de-wiki-news']
 
-def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int = None, createSplits=None, splits2tokenize: typing.List = SPLIT_NAMES):
+def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int = None, createSplits=None, splits2tokenize: List = SPLIT_NAMES):
   """Provides tokenized data for training
   Args:
     datasetName (str)
