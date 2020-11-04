@@ -16,7 +16,7 @@ def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int 
     tokenizerName (str)
     modelName (str)
     size (int, optional): Defaults to None.
-    createSplits (Dict, optional): Split the dataset into train, validation and test splits. Defaults to None. Has to be provided as a dict containing the keys `train` and `val` and values between 0 and 1. If `True` uses a default 80/10/10 split.
+    createSplits (Dict or bool, optional): Split the dataset into train, validation and test splits. Defaults to None. Has to be provided as a dict containing the keys `train` and `val` and values between 0 and 1. If `True` uses a default 80/10/10 split.
     splits2tokenize (List, optional): Can be set to only tokenize certain splits. Defaults to SPLIT_NAMES.
   Raises:
     ValueError: incorrect inputs"""
