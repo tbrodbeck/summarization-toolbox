@@ -15,7 +15,7 @@ def assertDirExistent(path):
         raise IOError(f'{path} does not exist')
 
 def assertFileInxestent(filePath):
-    """ assert if file is inexistent 
+    """ assert if file is inexistent
     :param: filePath"""
     if os.path.isfile(filePath):
         raise FileExistsError(f'{filePath} already exists')
@@ -121,7 +121,6 @@ def read_single_txt(file_path: str) -> List[str]:
   """
   read text/lines from
   a single text file
-  :param limit:
   :param file_path:
   """
   if not os.path.isfile(file_path):  # check if correct files exist
@@ -152,13 +151,10 @@ def read_config(config_path: str):
         for entry in config_parser[section]:
             config_dict[section].update({entry: config_parser[section][entry]})
 
-    path = config_dict['PATH']
-    model = config_dict['MODEL']
-    pipe = config_dict['PIPELINE']
+    return config_dict['MODEL'], config_dict['TRAINING']
 
-    return path, model, pipe
 
-def check_make_dir(dir_or_file: str, create_dir: bool = True) -> bool:
+def check_make_dir(dir_or_file: str, create_dir: bool = False) -> bool:
     """
     - check if file exists
     - check if directory exist
