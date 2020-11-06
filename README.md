@@ -78,9 +78,9 @@ Performs training process for selected model on the previously created data sets
 
 ### Input
 
-To execute the `Model Training` you need to previously run the `Data Provider` module to generate training data in the right format either from your own or predefined text/summary pairs.
-It requires files in the output format of the `Data Provider` module. Since you could have run the module for multiple text/summary sets, you have to provide the `$DATASETNAME` to train on.  
-Additionally you can choose a supported 🤗-model with the `$MODELNAME` parameter (the model will be downloaded to your virtual environment if you run the training for the first time).
+To execute the __Model Training__ you need to previously run the __Data Provider__ module to generate training data in the right format either from your own or predefined text/summary pairs.
+It requires files in the output format of the __Data Provider__ module. Since you could have run the module for multiple text/summary sets, you have to provide the `$DATASETNAME` to train on.  
+Additionally you can choose a supported 🤗-Model with the `$MODELNAME` parameter (the model will be downloaded to your virtual environment if you run the training for the first time).
 Since all model and training pipeline configurations are read from a config file (which has to be stored in the _./config_ directory) you might also select your config file by setting the `$CONFINAME` parameter.  
 If you don't do so, this parameter defaults to _'fine_tuning.ini'_ (which could also be used as a template for your own configurations).
 
@@ -89,30 +89,30 @@ If you don't do so, this parameter defaults to _'fine_tuning.ini'_ (which could 
 Use the Command Line Interface like this:
 
 ```bash
-python -m modelTrainer.main $DATASETNAME $MODELNAME $CONFINAME
+python modelTrainer/main.py $DATASETNAME $MODELNAME $CONFINAME
 ```
 
 ### Configurations
 
 The pipeline is designed to inherit all customizable parameters from an _'.ini'_ file.
-It fallows the structure that a component is defined by `\[COMPONENT]` and the assigned parameters by _parameter = parameter_value_ (as string).
+It fallows the structure that a component is defined by `[COMPONENT]` and the assigned parameters by `parameter = parameter_value` (as string).
 Only the parameters in the provided _'fine_tuning_config.ini'_ file stored in the _config_ folders can be changed.
 
 ### Output
 
-In config file you choose an _output_directory_ in this directory the following folder structur is created:
+In config file you choose an _output_directory_ in this directory the following folder structure is created:
 ```
 output_directory
     └── logs
     └── <model_shortname>
         └── <model_version>
-            └── <checkpoin_files>
+            └── <checkpoint_folder>
 ```
-<model_shortname> = Abbriviation for the chosen model
-<model_version> = Counts the versions (no override)
-<checkpoint_folders> = states of the model after a certain nuber of training steps
+_<model_shortname>_ = Abbriviation for the chosen model  
+_<model_version>_ = Counts the versions (no override)  
+_<checkpoint_folder>_ = states of the model after a certain number of training steps
 
-After the training the following final output files are saved in the <model_version> folder:
+After the training the following final output files are saved in the _<model_version>_ folder:
 - _config.json_
 - _training_args.pin_ (parameters for the [🤗-Trainer](https://huggingface.co/transformers/main_classes/trainer.html))
 - _pytorch_model.bin_ (model which can then be loaded for inference)
