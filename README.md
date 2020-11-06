@@ -114,7 +114,7 @@ _<checkpoint_folder>_ = states of the model after a certain number of training s
 
 After the training the following final output files are saved in the _<model_version>_ folder:
 - _config.json_
-- _training_args.pin_ (parameters for the [🤗-Trainer](https://huggingface.co/transformers/main_classes/trainer.html))
+- _training_args.bin_ (parameters for the [🤗-Trainer](https://huggingface.co/transformers/main_classes/trainer.html))
 - _pytorch_model.bin_ (model which can then be loaded for inference)
 
 
