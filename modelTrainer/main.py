@@ -7,12 +7,12 @@ python modelTrainer.mai.py -d DATASETNAME -m MODELNAME -c CONFIGNAME
 """
 import sys
 sys.path.append(".")
+from fire import Fire
 import os
 from timelogging.timeLog import log
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from modelTrainer.fine_tuning import fine_tune_model
 from utilities.gerneral_io_utils import read_config, check_make_dir
-from utilities.parser_utils import parser
 import torch
 
 CLI = [
@@ -56,7 +56,14 @@ TRAINING_CONFIG = [
 
 DATA_DIRECTORY = "./dataProvider/datasets/"
 
-if __name__ == '__main__':
+def initialize_trainer(dataset_name: str, model_name: str, config_name: str = "fine_tuning_config.ini"):
+    """
+    set up for training process
+    :param dataset_name:
+    :param model_name:
+    :param config_name:
+    :return:
+    """
     ###################################
     # Perform checks
     ###################################
@@ -72,17 +79,6 @@ if __name__ == '__main__':
     # check dataset folders
     assert len(dataset_names) > 0, \
         f"Directory '{DATA_DIRECTORY}' is empty!"
-
-    ###################################
-    # Initialize Parameters
-    ###################################
-
-    # parser automatically checks
-    # if no input is given
-    args = parser(*CLI)
-    dataset_name = args.dataset
-    model_name = args.model
-    config_name = args.config
 
     # check data name available
     assert dataset_name in dataset_names, \
@@ -103,32 +99,31 @@ if __name__ == '__main__':
 
     data_dict = dict()
     for split_name in SPLIT_NAMES:
-        files = list()
-        for text_name in TEXT_NAMES:
-            files.append(f"{split_name}_{text_name}.pt")
-
-        if files:
-            # check data file pairs
-            assert all([check_make_dir(tensor_dir + "/" + file) for file in files]), \
-                f"'{files[0]}'/'{files[0]}' pair doesn't exist in '{dataset_dir}'!"
-
-            data_dict[split_name] = dict()
+        if "test" not in split_name:
+            files = list()
             for text_name in TEXT_NAMES:
-                file_path = os.path.join(
-                    tensor_dir,
-                    f"{split_name}_{text_name}.pt"
-                )
+                files.append(f"{split_name}_{text_name}.pt")
 
-                log(f"load data from: {file_path}")
-                data_dict[split_name][text_name] = torch.load(
-                    open(file_path, "rb")
-                )
+            if files:
+                # check data file pairs
+                assert all([check_make_dir(tensor_dir + "/" + file) for file in files]), \
+                    f"'{files[0]}'/'{files[0]}' pair doesn't exist in '{dataset_dir}'!"
 
+                data_dict[split_name] = dict()
+                for text_name in TEXT_NAMES:
+                    file_path = os.path.join(
+                        tensor_dir,
+                        f"{split_name}_{text_name}.pt"
+                    )
+
+                    log(f"load data from: {file_path}")
+                    data_dict[split_name][text_name] = torch.load(
+                        open(file_path, "rb")
+                    )
 
     # check model is supported
     assert model_name in MODEL_NAMES, \
         f"'{model_name}' not supported. Please choose one of {MODEL_NAMES}"
-
 
     # set to default config if not given
     if config_name is None:
@@ -156,9 +151,11 @@ if __name__ == '__main__':
         if MODEL[parameter_name]:
             model_parameters[parameter_name] = MODEL[parameter_name]
 
-    log("Received parameters for model:")
+    print("\n")
+    log("\nReceived parameters for model:")
     for p in model_parameters:
-        log(f"{p}: {model_parameters[p]}")
+        log(f"- {p}: {model_parameters[p]}")
+    print("\n")
 
     # check if output directory exists
     if not check_make_dir(model_parameters["output_directory"], create_dir=True):
@@ -173,8 +170,8 @@ if __name__ == '__main__':
         model_parameters["language"],
         model_parameters["status"],
         model_parameters["output_directory"],
-        model_parameters["version"],
-        model_parameters["freezed_components"]
+        int(model_parameters["version"]),
+        model_parameters["freezed_components"].split(";")
     )
 
     ###################################
@@ -187,11 +184,12 @@ if __name__ == '__main__':
         if TRAINING[parameter_name]:
             training_parameters[parameter_name] = TRAINING[parameter_name]
 
+    print("\n")
     log("Received parameters for training:")
     for p in training_parameters:
-        log(f"{p}: {training_parameters[p]}")
+        log(f"- {p}: {training_parameters[p]}")
 
-    log("\n+++ FINE-TUNING +++")
+    print("\n+++ FINE-TUNING +++")
 
     fine_tune_model(
         model,
@@ -199,3 +197,7 @@ if __name__ == '__main__':
         data_dict,
         training_parameters
     )
+
+
+if __name__ == '__main__':
+    Fire(initialize_trainer)

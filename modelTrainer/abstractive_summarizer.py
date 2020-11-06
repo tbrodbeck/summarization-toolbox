@@ -85,29 +85,6 @@ class AbstractiveSummarizer:
         self.upper_token_ratio = 0.15
         self.lower_token_ratio = 0.05
 
-        # optimizer and scheduler only
-        # needed for fine-tuning
-        self.optimizer = None
-        self.scheduler = None
-
-
-    def set_mode(self, mode: str):
-        """
-        set model to train or
-        evaluation mode
-        :param mode:
-        :return:
-        """
-        assert mode in ['eval', 'train'], \
-            "Mode can only be 'eval' or 'train'!"
-
-        if mode == "eval":
-            self.model.eval()
-        else:
-            self.model.train()
-
-        log(f"set model to {mode} mode")
-
 
     def set_args(self) -> Tuple[Dict, Dict]:
         """
@@ -182,6 +159,12 @@ class AbstractiveSummarizer:
         return model, tokenizer
 
 
+    @staticmethod
+    def freeze_params(component):
+        for par in component.parameters():
+            par.requires_grad = False
+
+
     def freeze_model_layers(self, layers: list):
         """
         freeze layers
@@ -198,17 +181,13 @@ class AbstractiveSummarizer:
         if all([layer in model_layers for layer in layers]):
             for model_component in layers:
                 if model_component == 'shared':
-                    self.model.shared.weight.requires_grad = False
-                    self.model.shared.eval()
+                    self.freeze_params(self.model.shared)
                 if model_component == 'encoder':
-                    self.model.encoder.embed_tokens.weight.requires_grad = False
-                    self.model.encoder.eval()
+                    self.freeze_params(self.model.encoder.embed_tokens)
                 if model_component == 'decoder':
-                    self.model.decoder.embed_tokens.weight.requires_grad = False
-                    self.model.decoder.eval()
+                    self.freeze_params(self.model.decoder.embed_tokens)
                 if model_component == 'lm_head':
-                    self.model.lm_head.weight.requires_grad = False
-                    self.model.lm_head.eval()
+                    self.freeze_params(self.model.model.lm_head)
                 log(f"freezed {model_component} layers")
 
 
