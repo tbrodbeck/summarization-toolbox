@@ -136,7 +136,7 @@ dmypy.json
 .pyre/
 
 # mac files
-./idea
+.idea/
 
 # do not upload model files
 results/
