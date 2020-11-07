@@ -18,8 +18,6 @@ def fine_tune_model(summary_model, results_path: str, data_dict: dict, parameter
     :param parameters:
     :return:
     """
-    # set model to training mode
-    summary_model.set_mode("train")
 
     # get dataset
     if "val" in data_dict:
@@ -61,6 +59,7 @@ def fine_tune_model(summary_model, results_path: str, data_dict: dict, parameter
         logging_dir=logs_path,  # directory for storing logs
         logging_steps=100,
         do_train=True,
+        do_eval=True if val_data else False,
 
     )
 
@@ -69,7 +68,7 @@ def fine_tune_model(summary_model, results_path: str, data_dict: dict, parameter
         model=summary_model.model,  # the instantiated 🤗 Transformers model to be trained
         args=training_args,  # training arguments, defined above
         train_dataset=train_data,  # training dataset
-        eval_dataset=val_data,  # evaluation dataset
+        eval_dataset=val_data if val_data else None,  # evaluation dataset
     )
 
     # perform the training
