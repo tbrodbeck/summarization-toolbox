@@ -22,7 +22,7 @@ Now the `--createSplits` flag has to be used to create the `train`, `val` and `t
 
 #### Providing Train, Val and Test Split Files
 
-If training, validation and test splits are already present, they should be provided in the following format of [🤗](https://github.com/huggingface/transformers/tree/master/examples/seq2seq).
+If training, validation and test splits are already present, they should be provided in the following format of [🤗-seq2seq examples](https://github.com/huggingface/transformers/tree/master/examples/seq2seq).
 
 ```
 train.source
@@ -38,7 +38,7 @@ test.target
 Use the Command Line Interface like this:
 
 ```
-python -m dataProvider.main $DATASETNAME $TOKENIZERNAME $MODELNAME <flags>
+python dataProvider/main.py $DATASETNAME $TOKENIZERNAME $MODELNAME <flags>
 ```
 
 #### Flags
@@ -51,7 +51,7 @@ Defaults to `None`.
 
 Split the dataset into train, validation and test splits. Defaults to `None`.
 
-`$CREATESPLITS` has to be a dictionary containing the keys `train` and `val` and values between 0 and 1. The value of `train` represents the ratio of the dataset that is used for training (and not for validation or testing). The value of `val` represents the the ratio between the validation and the test set.
+`$CREATESPLITS` has to be a dictionary containing the keys `train` and `val` and values between 0 and 1. The value of `train` represents the ratio of the dataset that is used for training (and not for validation or testing). The value of `val` represents the the ratio between the validation and the test set. Because of shell restrictions the dictionary has to be wrapped in `"` in the CLI, like this: `--createSplits="{'train': 0.7, 'val': 0.66}"`
 
 If the value of `$CREATESPLITS` is `True` it defaults to `{'train': 0.8, 'val': 0.5}`, which results a 80/10/10 split.
 
