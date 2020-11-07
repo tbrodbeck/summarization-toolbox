@@ -104,11 +104,7 @@ def initialize_trainer(dataset_name: str, model_name: str, config_name: str = "f
             for text_name in TEXT_NAMES:
                 files.append(f"{split_name}_{text_name}.pt")
 
-            if files:
-                # check data file pairs
-                assert all([check_make_dir(tensor_dir + "/" + file) for file in files]), \
-                    f"'{files[0]}'/'{files[0]}' pair doesn't exist in '{dataset_dir}'!"
-
+            if all([check_make_dir(tensor_dir + "/" + file) for file in files]):
                 data_dict[split_name] = dict()
                 for text_name in TEXT_NAMES:
                     file_path = os.path.join(
