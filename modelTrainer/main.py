@@ -7,12 +7,13 @@ python modelTrainer.mai.py -d DATASETNAME -m MODELNAME -c CONFIGNAME
 """
 import sys
 sys.path.append(".")
-from fire import Fire
 import os
 from timelogging.timeLog import log
+import fire
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from modelTrainer.fine_tuning import fine_tune_model
 from utilities.gerneral_io_utils import read_config, check_make_dir
+from utilities.parser_utils import parser
 import torch
 
 CLI = [
@@ -51,7 +52,8 @@ MODEL_CONFIG = [
 TRAINING_CONFIG = [
     "epochs",
     "train_batch_size",
-    "val_batch_size"
+    "val_batch_size",
+    "checkpoint_steps"
 ]
 
 DATA_DIRECTORY = "./dataProvider/datasets/"
@@ -196,4 +198,4 @@ def initialize_trainer(dataset_name: str, model_name: str, config_name: str = "f
 
 
 if __name__ == '__main__':
-    Fire(initialize_trainer)
+    fire.Fire(initialize_trainer)
