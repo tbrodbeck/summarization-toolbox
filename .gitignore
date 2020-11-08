@@ -137,6 +137,7 @@ dmypy.json
 
 # mac files
 .idea/
+*.DS_Store
 
 # do not upload model files
 results/
