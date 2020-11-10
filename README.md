@@ -59,9 +59,13 @@ If the value of `$CREATESPLITS` is `True` it defaults to `{'train': 0.8, 'val': 
 
 Can be set to only tokenize certain splits. Defaults to `[train, val, test]`.
 
+##### `--filtering=$FILTERING`
+
+Longer examples than the maximum token size are filtered, else they are truncated. Defaults to `True`.
+
 ### Output
 
-The resulting tokenized [PyTorch](https://pytorch.org/) tensors are saved in the `dataProvider/datasets/$DATASETNAME/tensors` directory as the following files:
+The resulting tokenized [PyTorch](https://pytorch.org/) tensors are saved in the `dataProvider/datasets/$DATASETNAME/$TOKENIZERNAME_filtered` directory as the following files:
 
 ```
 train_source.pt
