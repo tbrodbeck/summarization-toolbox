@@ -12,14 +12,14 @@ MODEL_NAMES = ['t5-base']
 SPLIT_NAMES = ['train', 'val', 'test']
 TOKENIZER_NAMES = ['WikinewsSum/t5-base-multi-de-wiki-news']
 
-def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int = None, createSplits=None, splits2tokenize: typing.List = SPLIT_NAMES, filtering=True):
+def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int = None, createSplits=False, splits2tokenize: typing.List = SPLIT_NAMES, filtering=True):
   """Provides tokenized data for training
   Args:
     datasetName (str)
     tokenizerName (str)
     modelName (str)
-    size (int, optional): Defaults to None.
-    createSplits (Dict or bool, optional): Split the dataset into train, validation and test splits. Defaults to None. Has to be provided as a dict containing the keys `train` and `val` and values between 0 and 1. If `True` uses a default 80/10/10 split.
+    size (int, optional): Limits the amount of samples that are taken for tokenization for each split. Defaults to None.
+    createSplits (Dict or bool, optional): Split the dataset into train, validation and test splits. Has to be provided as a dict containing the keys `train` and `val` and values between 0 and 1. If `True` uses a default 80/10/10 split. Defaults to False.
     splits2tokenize (List, optional): Can be set to only tokenize certain splits. Defaults to SPLIT_NAMES.
     filtering (bool, optional): Longer examples than the maximum token size are filtered, else they are truncated. Defaults to True.
   Raises:
@@ -114,7 +114,6 @@ def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int 
         break
       assertFileInxestent(tensorPath)
       torch.save(tokens, tensorPath)
-
 
 if __name__ == "__main__":
   fire.Fire(provideData)
