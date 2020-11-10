@@ -45,11 +45,11 @@ python dataProvider/main.py $DATASETNAME $TOKENIZERNAME $MODELNAME <flags>
 
 ##### `--size=$SIZE`
 
-Defaults to `None`.
+Limits the amount of samples that are taken for tokenization for each split. Defaults to `None`.
 
 ##### `--createSplits=$CREATESPLITS`
 
-Split the dataset into train, validation and test splits. Defaults to `None`.
+Split the dataset into train, validation and test splits. Defaults to `False`.
 
 `$CREATESPLITS` has to be a dictionary containing the keys `train` and `val` and values between 0 and 1. The value of `train` represents the ratio of the dataset that is used for training (and not for validation or testing). The value of `val` represents the the ratio between the validation and the test set. Because of shell restrictions the dictionary has to be wrapped in `"` in the CLI, like this: `--createSplits="{'train': 0.7, 'val': 0.66}"`
 
