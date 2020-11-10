@@ -31,8 +31,6 @@ def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int 
     raise ValueError('unkown tokenizer')
   if size and size < 1:
     raise ValueError('wrong size')
-
-  # connecting to dataset
   dataDir = f'dataProvider/datasets/{datasetName}/'
   assertDirExistent(dataDir)
 
@@ -75,7 +73,7 @@ def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int 
     targetText = read_single_txt('{}{}.{}'.format(dataDir, splitName, 'target'))
     textLen = len(sourceText)
     assert textLen == len(targetText)
-    if size:
+    if size:  # optional limitation of samples for tokenization
       sourceText = sourceText[:size]
       targetText = targetText[:size]
     log(f'tokenizing target batch for {splitName} of {textLen} samples')
@@ -101,17 +99,15 @@ def provideData(datasetName: str, tokenizerName: str, modelName: str, size: int 
       deletedSamples = len(tokensDeletes)
       log('{} ({}%) of samples were filtered because they were too long'.format(deletedSamples, round((deletedSamples / len(sourceTokens['attention_mask'])) * 100, 2)))
     for textName, tokens in [('source', sourceTokens), ('target', targetTokens)]:
-      if filtering:  # filtering and saving to pt tensor
-        for key in tokens:
+      if filtering:  # creating filtered PyTorch tensors from tokenization lists and replacing them
+        for key in tokens:  # tokens contains `inputs_ids` and `attention_mask`
           tokensList = tokens[key]
           for i in sorted(tokensDeletes, reverse=True):  # actual filtering
             del tokensList[i]
           tokensTensor = torch.LongTensor(np.array(tokensList)[:, :512])
           tokens[key] = tokensTensor
       tensorPath = f'{tensorDir}{splitName}_{textName}.pt'
-      for key in tokens:
-        log(f'output size for {tensorPath}:', tokens[key].size())
-        break
+      log(f'{tensorPath} with output size:', tokens[list(tokens.keys())[0]].size())
       assertFileInxestent(tensorPath)
       torch.save(tokens, tensorPath)
 
