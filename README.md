@@ -133,3 +133,9 @@ Use [fd](https://github.com/sharkdp/fd) and [entr](https://eradman.com/entrproje
 ```
 fd . | entr pytest
 ```
+
+Use the following command to add a new package (optionally with version number) `$pkg` to the repository, while keeping `requirements.txt` orderly:
+
+```
+echo $pkg | sort -o requirements.txt - requirements.txt; pip install $pkg
+```
