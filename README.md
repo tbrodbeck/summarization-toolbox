@@ -131,5 +131,5 @@ pip install pytest
 Use [fd](https://github.com/sharkdp/fd) and [entr](https://eradman.com/entrproject/) to execute tests automatically on file changes:
 
 ```
-fd . | entr python -m pytest
+fd . | entr pytest
 ```
