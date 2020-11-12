@@ -2,7 +2,7 @@
 
 ## Installation
 
-```
+```sh
 pip install -r requirements.txt
 ```
 
@@ -37,7 +37,7 @@ test.target
 
 Use the Command Line Interface like this:
 
-```
+```sh
 python dataProvider/main.py $DATASETNAME $TOKENIZERNAME $MODELNAME <flags>
 ```
 
@@ -92,7 +92,7 @@ If you don't do so, this parameter defaults to _'fine_tuning.ini'_ (which could 
 
 Use the Command Line Interface like this:
 
-```bash
+```sh
 python modelTrainer/main.py $DATASETNAME $MODELNAME $CONFIGNAME
 ```
 
@@ -124,18 +124,18 @@ After the training the following final output files are saved in the _<model_ver
 
 ## Development Instructions
 
-```
+```sh
 pip install pytest
 ```
 
 Use [fd](https://github.com/sharkdp/fd) and [entr](https://eradman.com/entrproject/) to execute tests automatically on file changes:
 
-```
+```sh
 fd . | entr pytest
 ```
 
 Use the following command to add a new package (optionally with version number) `$pkg` to the repository, while keeping `requirements.txt` orderly:
 
-```
+```sh
 echo $pkg | sort -o requirements.txt - requirements.txt; pip install $pkg
 ```
