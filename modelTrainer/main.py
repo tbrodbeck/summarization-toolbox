@@ -187,7 +187,7 @@ def initialize_trainer(dataset_name: str, model_name: str, config_name: str = "f
     for p in training_parameters:
         log(f"- {p}: {training_parameters[p]}")
 
-    print("\n+++ FINE-TUNING +++")
+    log("\n+++ FINE-TUNING +++")
 
     fine_tune_model(
         model,

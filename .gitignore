@@ -1,4 +1,6 @@
 dataProvider/datasets
+results/
+.idea
 *.ipynb
 
 # Byte-compiled / optimized / DLL files

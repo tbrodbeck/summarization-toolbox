@@ -7,7 +7,7 @@ def p(modulePath):
     return 'main.' + modulePath
 
 class TestDataProvider(unittest.TestCase):
-  def testMain(self):
+  def test_provideData(self):
     # # all possible combinations can be created
     # for datasetName in o.DATASET_NAMES:
     #   for tokenizerName in o.TOKENIZER_NAMES:
