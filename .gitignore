@@ -1,4 +1,6 @@
 dataProvider/datasets
+results/
+.idea
 *.ipynb
 
 # Byte-compiled / optimized / DLL files
@@ -134,9 +136,3 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
-
-# mac files
-.idea/
-
-# do not upload model files
-results/
