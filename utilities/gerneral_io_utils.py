@@ -142,7 +142,7 @@ def read_config(config_path: str):
     log("Read from config", config_path)
 
     if not os.path.isfile(config_path):
-        raise FileNotFoundError
+        raise FileNotFoundError(config_path)
 
     config_parser.read(config_path)
     for section in config_parser.sections():
