@@ -82,44 +82,44 @@ class SemanticSimilarityMetric:
 
         utilities.gerneral_io_utils.write_excel(overview_dict, output_path, "evaluation.xlsx")
 
-def evaluate_model(model: AutoModelWithLMHead,
-                   input_path: str,
-                   text_name: str,
-                   target_name: str,
-                   output_path: str = None):
-    """
-    evaluate process
+# def evaluate_model(model: AutoModelWithLMHead,
+#                    input_path: str,
+#                    text_name: str,
+#                    target_name: str,
+#                    output_path: str = None):
+#     """
+#     evaluate process
 
-    :param target_name:
-    :param text_name:
-    :param input_path:
-    :param model:
-    :param output_path: if output is provided
-                        it automatically produces
-                        an excel sheet as overview
-    :return:
-    """
+#     :param target_name:
+#     :param text_name:
+#     :param input_path:
+#     :param model:
+#     :param output_path: if output is provided
+#                         it automatically produces
+#                         an excel sheet as overview
+#     :return:
+#     """
 
-    # put model in evaluation mode
-    semantic_similiarity = SemanticSimilarityMetric("de")
-    model.set_mode("eval")
+#     # put model in evaluation mode
+#     semantic_similiarity = SemanticSimilarityMetric("de")
+#     model.set_mode("eval")
 
-    data = utilities.gerneral_io_utils.read_data(input_path, text_name, target_name, limit=100)
+#     data = utilities.gerneral_io_utils.read_data(input_path, text_name, target_name, limit=100)
 
-    if output_path is None:
-        for text, target in data:
-            summary = model.predict(text)
-            similarity_score = semantic_similiarity.get_score(summary, target)
-            print("\nText:")
-            print(text)
-            print("\nTarget:")
-            print(target)
-            print("\nScore:", similarity_score)
-    else:
-        print("\nProducing overview...")
-        texts = [item[0] for item in data]
-        targets = [item[1] for item in data]
-        semantic_similiarity.produce_overview(model, texts, targets, output_path)
+#     if output_path is None:
+#         for text, target in data:
+#             summary = model.predict(text)
+#             similarity_score = semantic_similiarity.get_score(summary, target)
+#             print("\nText:")
+#             print(text)
+#             print("\nTarget:")
+#             print(target)
+#             print("\nScore:", similarity_score)
+#     else:
+#         print("\nProducing overview...")
+#         texts = [item[0] for item in data]
+#         targets = [item[1] for item in data]
+#         semantic_similiarity.produce_overview(model, texts, targets, output_path)
 
 def predict(modelPaths: List):
     for modelPath in modelPaths:
@@ -132,7 +132,7 @@ def evaluate(runPath: str, tokenizerName: str, modelName: str, datasetName: str)
     sourceText = read_single_txt('{}{}.{}'.format(dataDir, 'val', 'source'))
     targetText = read_single_txt('{}{}.{}'.format(dataDir, 'val', 'target'))
     walk = os.walk(runPath)
-    try:  # works if the run contains checkpaths
+    try:  # collects checkpoints if the run contains checkpoints
         _, models, _ = next(walk)
         log('Checkpoints:', models)
         modelPaths = []
