@@ -58,9 +58,9 @@ def fine_tune_model(summary_model, results_path: str, data_dict: dict, parameter
         weight_decay=0.01,  # strength of weight decay
         logging_dir=logs_path,  # directory for storing logs
         logging_steps=100,
+        save_steps=int(parameters["checkpoint_steps"]),
         do_train=True,
-        do_eval=True if val_data else False,
-
+        do_eval=True if val_data else False
     )
 
     # initialize the trainer class
