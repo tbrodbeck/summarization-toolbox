@@ -7,12 +7,13 @@ python modelTrainer.mai.py -d DATASETNAME -m MODELNAME -c CONFIGNAME
 """
 import sys
 sys.path.append(".")
-from fire import Fire
 import os
 from timelogging.timeLog import log
+import fire
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from modelTrainer.fine_tuning import fine_tune_model
 from utilities.gerneral_io_utils import read_config, check_make_dir
+from utilities.parser_utils import parser
 import torch
 
 CLI = [
@@ -51,7 +52,8 @@ MODEL_CONFIG = [
 TRAINING_CONFIG = [
     "epochs",
     "train_batch_size",
-    "val_batch_size"
+    "val_batch_size",
+    "checkpoint_steps"
 ]
 
 DATA_DIRECTORY = "./dataProvider/datasets/"
@@ -104,11 +106,7 @@ def initialize_trainer(dataset_name: str, model_name: str, config_name: str = "f
             for text_name in TEXT_NAMES:
                 files.append(f"{split_name}_{text_name}.pt")
 
-            if files:
-                # check data file pairs
-                assert all([check_make_dir(tensor_dir + "/" + file) for file in files]), \
-                    f"'{files[0]}'/'{files[0]}' pair doesn't exist in '{dataset_dir}'!"
-
+            if all([check_make_dir(tensor_dir + "/" + file) for file in files]):
                 data_dict[split_name] = dict()
                 for text_name in TEXT_NAMES:
                     file_path = os.path.join(
@@ -196,4 +194,4 @@ def initialize_trainer(dataset_name: str, model_name: str, config_name: str = "f
 
 
 if __name__ == '__main__':
-    Fire(initialize_trainer)
+    fire.Fire(initialize_trainer)
