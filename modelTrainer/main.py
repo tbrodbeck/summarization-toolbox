@@ -86,10 +86,10 @@ def initialize_trainer(dataset_name: str, model_name: str, config_name: str = "f
 
     # check tensors folder
     dataset_dir = os.path.join(DATA_DIRECTORY, dataset_name)
-    assert check_make_dir(dataset_dir + "/tensors"), \
+    tensor_dir = os.path.join(dataset_dir, model_name)
+    assert check_make_dir(dataset_dir), \
         f"No 'tensors' folder in '{dataset_dir}'"
 
-    tensor_dir = os.path.join(dataset_dir, "tensors")
     data_files = [file for file in os.listdir(tensor_dir)
                   if '.pt' in file]
 
@@ -127,16 +127,12 @@ def initialize_trainer(dataset_name: str, model_name: str, config_name: str = "f
 
     # set to default config if not given
     if config_name is None:
-        config_path = "./config/fine_tuning_config.ini"
+        config_path = "fine_tuning_config.ini"
     else:
         # check .ini file
         assert ".ini" in config_name, \
             "Config has to be an '.ini' file!"
-        config_path = os.path.join("./config", config_name)
-
-    # check config file exists
-    assert check_make_dir(config_path), \
-        f"'{config_path}' doesn't exist. Please provide config a file!"
+        config_path = os.path.join("./modelTrainer/config", config_name)
 
     ###################################
     # Read from config
