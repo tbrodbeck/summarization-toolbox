@@ -7,11 +7,10 @@ import os
 import spacy
 from timelogging.timeLog import log
 from typing import Dict, Tuple
-from transformers import AutoModelWithLMHead, AutoTokenizer, AutoConfig
+from transformers import AutoModelWithLMHead, AutoTokenizer, AutoConfig, T5ForConditionalGeneration
 import torch
 from utilities.gerneral_io_utils import check_make_dir
 from utilities.cleaning_utils import truncate_incomplete_sentences
-
 
 
 class AbstractiveSummarizer:
@@ -19,7 +18,7 @@ class AbstractiveSummarizer:
     class for abstractive text summarization
     """
 
-    def __init__(self, language: str, status: str = 'base', base_path: str = './output/results', version: int = None, freezed_layers: list = []):
+    def __init__(self, language: str, status: str = 'base', base_path: str = './results', version: int = None, freezed_layers: list = [], checkpoint: int = None):
         """
         define model
         """
@@ -28,6 +27,7 @@ class AbstractiveSummarizer:
             log(f"directory {self.base_path} was created")
 
         self.version = str(version)
+        self.checkpoint = f"checkpoint-{checkpoint}"
 
         assert language in ["english", "german"], \
         f"{language} is not a supported language!"
@@ -113,7 +113,7 @@ class AbstractiveSummarizer:
         model = None
 
         if self.status == "fine-tuned":
-            if 'output' in self.base_path:
+            if 'results' in self.base_path:
                 model_dir = os.path.join(
                         self.base_path,
                         self.short_name
@@ -140,7 +140,7 @@ class AbstractiveSummarizer:
                         log(f"version {self.version} not found! "
                               f"chose latest version: {latest_version}")
 
-                    model = AutoModelWithLMHead.from_pretrained(model_path)
+                    model = T5ForConditionalGeneration.from_pretrained(model_path)
             else:
                 log(f"no pretrained models for {self.short_name}")
                 exit()
