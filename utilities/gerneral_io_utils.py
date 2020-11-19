@@ -142,7 +142,7 @@ def read_config(config_path: str):
     log("Read from config", config_path)
 
     if not os.path.isfile(config_path):
-        raise FileNotFoundError
+        raise FileNotFoundError(config_path)
 
     config_parser.read(config_path)
     for section in config_parser.sections():
@@ -150,8 +150,10 @@ def read_config(config_path: str):
 
         for entry in config_parser[section]:
             config_dict[section].update({entry: config_parser[section][entry]})
-
-    return config_dict['MODEL'], config_dict['TRAINING']
+    try:
+        return config_dict['MODEL'], config_dict['TRAINING']
+    except KeyError:
+        return config_dict['MODEL'], config_dict['EVALUATION']
 
 
 def check_make_dir(dir_or_file: str, create_dir: bool = False) -> bool:
