@@ -121,6 +121,11 @@ After the training the following final output files are saved in the _<model_ver
 - _training_args.bin_ (parameters for the [🤗-Trainer](https://huggingface.co/transformers/main_classes/trainer.html))
 - _pytorch_model.bin_ (model which can then be loaded for inference)
 
+## Evaluator
+Example command:
+```sh
+python evaluator/main.py modelTrainer/results/t5-de/0/config.json WikinewsSum/t5-base-multi-de-wiki-news t5-base golem
+```
 
 ## Development Instructions
 
@@ -137,5 +142,5 @@ fd . | entr pytest
 Use the following command to add a new package (optionally with version number) `$pkg` to the repository, while keeping `requirements.txt` orderly:
 
 ```sh
-echo $pkg | sort -o requirements.txt - requirements.txt; pip install $pkg
+echo $pkg | sort -o requirements.txt - requirements.txt && pip install $pkg
 ```

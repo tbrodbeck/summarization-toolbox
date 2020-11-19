@@ -54,13 +54,14 @@ def fine_tune_model(summary_model, results_path: str, data_dict: dict, parameter
         num_train_epochs=int(parameters["epochs"]),  # total number of training epochs
         per_device_train_batch_size=int(parameters["train_batch_size"]),  # batch size per device during training
         per_device_eval_batch_size=int(parameters["val_batch_size"]) if val_data else None,  # batch size for evaluation
+        evaluation_strategy="steps" if val_data else "no",
+        eval_steps=500,
         warmup_steps=500,  # number of warmup steps for learning rate scheduler
         weight_decay=0.01,  # strength of weight decay
         logging_dir=logs_path,  # directory for storing logs
-        logging_steps=100,
+        logging_steps=500,
         save_steps=int(parameters["checkpoint_steps"]),
-        do_train=True,
-        do_eval=True if val_data else False
+        do_train=True
     )
 
     # initialize the trainer class
