@@ -193,17 +193,22 @@ def write_txt(file_path: str, texts: List[str]):
           file_handle.write(text.rstrip("\n") + "\n")
 
 
-def write_excel(dictionary: dict, output_dir: str, file_name: str):
+def write_table(dictionary: dict, output_dir: str, file_name: str, file_format: str = "csv"):
     """
     general function to save a
     dictionary as an excel sheet
     :return:
     """
+    assert file_format in ["csv", "excel"], "'file_format' has to be either 'excel' or 'csv'!"
     output_path = os.path.join(output_dir, file_name)
     log("\nWrite results to", output_path)
     df = pd.DataFrame.from_dict(dictionary, orient="columns")
-    with pd.ExcelWriter(output_path) as writer:
-        df.to_excel(writer, "Overview")
+    if file_format == "csv":
+        output_path += ".xlsx"
+        df.to_csv(output_path)
+    else:
+        with pd.ExcelWriter(output_path + ".csv") as writer:
+            df.to_excel(writer, "Overview")
 
 
 def write_pickle(obj: Union[object, list], file_name: str, file_path: str):
