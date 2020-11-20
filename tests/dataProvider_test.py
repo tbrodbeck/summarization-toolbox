@@ -1,6 +1,4 @@
 import dataProvider.main as o
-import glob
-import os
 import unittest
 
 def p(modulePath):

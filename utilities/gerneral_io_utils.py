@@ -204,10 +204,10 @@ def write_table(dictionary: dict, output_dir: str, file_name: str, file_format: 
     log("\nWrite results to", output_path)
     df = pd.DataFrame.from_dict(dictionary, orient="columns")
     if file_format == "csv":
-        output_path += ".xlsx"
-        df.to_csv(output_path)
+        output_path += ".csv"
+        df.to_csv(output_path, sep=";")
     else:
-        with pd.ExcelWriter(output_path + ".csv") as writer:
+        with pd.ExcelWriter(output_path + ".xlsx") as writer:
             df.to_excel(writer, "Overview")
 
 
