@@ -7,14 +7,16 @@ python modelTrainer.mai.py -d DATASETNAME -m MODELNAME -c CONFIGNAME
 """
 import sys
 sys.path.append(".")
+
 import os
 from timelogging.timeLog import log
 import fire
+import torch
+
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from modelTrainer.fine_tuning import fine_tune_model
 from utilities.gerneral_io_utils import read_config, check_make_dir
-from utilities.parser_utils import parser
-import torch
+
 
 CLI = [
     "dataset",
