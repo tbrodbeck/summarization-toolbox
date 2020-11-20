@@ -34,10 +34,11 @@ MODEL_CONFIG = [
 EVALUTATION_CONFIG = [
     "metric",
     "output_directory",
-    "samples"
+    "samples",
+    "reference_model"
 ]
 
-def evaluate(data_set_name: str, model_name: str, config_path: str = "./evaluator/config/evaluation_config.ini", reference_to_base: bool = False):
+def evaluate(data_set_name: str, model_name: str, config_path: str = "./evaluator/config/evaluation_config.ini"):
     """
     run evaluation
     :param reference_to_base:
@@ -90,7 +91,7 @@ def evaluate(data_set_name: str, model_name: str, config_path: str = "./evaluato
 
     # initialize reference model
 
-    if reference_to_base:
+    if evaluation_parameters["reference_model"] == "True":
         reference_model = AbstractiveSummarizer(
             model_parameters["language"],
             "base"

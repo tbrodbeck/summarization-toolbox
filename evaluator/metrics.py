@@ -1,6 +1,7 @@
 import sentence_transformers
 import torch
 
+
 class SemanticSimilarityMetric:
     """
     calculates cosine similarity
@@ -10,14 +11,14 @@ class SemanticSimilarityMetric:
 
         assert language in ["english", "german"]
 
-        self.transformer = sentence_transformers.SentenceTransformer("roberta-large-nli-stsb-mean-tokens")
+        self.transformer = sentence_transformers.SentenceTransformer("bert-base-nli-stsb-mean-tokens")
         self.cosine_similarity = torch.nn.CosineSimilarity(dim=1, eps=1e-6)
 
         if language == "english":
             print("Intitialized semantic similarity metric for English texts.")
+
         else:
             print("Intitialized semantic similarity metric for German texts.")
-
 
     def get_score(self, prediction: str, target: str) -> float:
         """
@@ -34,3 +35,4 @@ class SemanticSimilarityMetric:
         score = self.cosine_similarity(prediction_embeddings, target_embeddings)
 
         return score.item()
+
