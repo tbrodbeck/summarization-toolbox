@@ -7,6 +7,7 @@ from timelogging.timeLog import log
 from modelTrainer.data_set_creation import create_dataset
 from transformers import Trainer, TrainingArguments
 from utilities.gerneral_io_utils import check_make_dir
+from utilities.cleaning_utils import limit_data
 
 
 def fine_tune_model(summary_model, results_path: str, data_dict: dict, parameters: dict):
@@ -18,6 +19,10 @@ def fine_tune_model(summary_model, results_path: str, data_dict: dict, parameter
     :param parameters:
     :return:
     """
+
+    # limit samples taken into
+    # account for training
+    data_dict["train"] = limit_data(data_dict["train"], int(parameters["number_samples"]))
 
     # get dataset
     if "val" in data_dict:
