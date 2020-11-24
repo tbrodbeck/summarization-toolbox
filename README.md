@@ -65,7 +65,7 @@ Longer examples than the maximum token size are filtered, else they are truncate
 
 ### Output
 
-The resulting tokenized [PyTorch](https://pytorch.org/) tensors are saved in the `dataProvider/datasets/$DATASETNAME/$TOKENIZERNAME_filtered` directory as the following files:
+The resulting tokenized [PyTorch](https://pytorch.org/) tensors are saved in the `dataProvider/datasets/$DATASETNAME/$TOKENIZERNAME[_filtered]` directory as the following files:
 
 ```
 train_source.pt

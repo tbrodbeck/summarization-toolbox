@@ -4,8 +4,12 @@ module for all supported metrics
 import sentence_transformers
 import torch
 
+class Metric:
+    """Interace for Metrics"""
+    def get_score(self, prediction: str, target: str) -> float:
+        return 0.0
 
-class SemanticSimilarityMetric:
+class SemanticSimilarityMetric(Metric):
     """
     calculates cosine similarity
     of word embeddings
@@ -38,4 +42,3 @@ class SemanticSimilarityMetric:
         score = self.cosine_similarity(prediction_embeddings, target_embeddings)
 
         return score.item()
-

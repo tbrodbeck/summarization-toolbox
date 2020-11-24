@@ -1,16 +1,13 @@
 import sys
 sys.path.append(".")
-
 import fire
 import os
-
-from timelogging.timeLog import log
 import torch
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from utilities.gerneral_io_utils import check_make_dir, read_config
 from evaluator.metrics import SemanticSimilarityMetric
 from evaluator.eval import run_evaluation
-
+from timelogging.timeLog import log
 
 DATA_DIR = "./dataProvider/datasets"
 
@@ -32,7 +29,7 @@ MODEL_CONFIG = [
 # required parameters
 # for evaluation
 EVALUTATION_CONFIG = [
-    "metric",
+"metric",
     "output_directory",
     "samples",
     "reference_model"
@@ -85,7 +82,7 @@ def evaluate(data_set_name: str, model_name: str, config_path: str = "./evaluato
         model_parameters["status"],
         model_parameters["model_directory"],
         int(model_parameters["version"]),
-        checkpoint=None if model_parameters["checkpoint"] == "None" \
+        checkpoint=None if model_parameters["checkpoint"] == "None"
             else model_parameters["checkpoint"]
     )
 

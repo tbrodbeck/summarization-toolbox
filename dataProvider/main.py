@@ -2,8 +2,8 @@ import sys
 sys.path.append(".")
 import fire
 import numpy as np
-from timelogging.timeLog import log
 import torch
+from timelogging.timeLog import log
 import transformers
 import typing
 from utilities.gerneral_io_utils import read_single_txt, write_txt, assertDirExistent, assertFileInxestent, check_make_dir

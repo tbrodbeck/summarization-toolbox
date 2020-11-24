@@ -3,10 +3,10 @@ orchestrate the evaluation
 """
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from utilities.gerneral_io_utils import write_table
-from evaluator.metrics import SemanticSimilarityMetric
+from evaluator.metrics import SemanticSimilarityMetric, Metric
 from typing import Union
 
-def run_evaluation(data: dict, model: AbstractiveSummarizer, metric, out_dir, samples, base_model: AbstractiveSummarizer = None):
+def run_evaluation(data: dict, model: AbstractiveSummarizer, metric, out_dir, samples: int, base_model: AbstractiveSummarizer = None):
     """
     orchestrator to add different evaluation methods
     :param data:
@@ -22,7 +22,7 @@ def run_evaluation(data: dict, model: AbstractiveSummarizer, metric, out_dir, sa
     # calculate different scores
     calculate_scores(data, metric, model, base_model, out_dir)
 
-def calculate_scores(data: dict, metric: SemanticSimilarityMetric, model: AbstractiveSummarizer, base_model: Union[None, AbstractiveSummarizer], out_dir: str):
+def calculate_scores(data: dict, metric: Metric, model: AbstractiveSummarizer, base_model: Union[None, AbstractiveSummarizer], out_dir: str):
     """
     calculate all metric permutations
     :param data:

@@ -7,16 +7,13 @@ python modelTrainer.mai.py -d DATASETNAME -m MODELNAME -c CONFIGNAME
 """
 import sys
 sys.path.append(".")
-
 import os
-from timelogging.timeLog import log
 import fire
 import torch
-
+from timelogging.timeLog import log
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from modelTrainer.fine_tuning import fine_tune_model
 from utilities.gerneral_io_utils import read_config, check_make_dir
-
 
 CLI = [
     "dataset",
@@ -175,9 +172,9 @@ def initialize_trainer(dataset_name: str, model_name: str, config_name: str = "f
         model_parameters["status"],
         model_parameters["model_directory"],
         int(model_parameters["version"]),
-        None if model_parameters["freezed_components"] == "None" \
+        None if model_parameters["freezed_components"] == "None"
             else model_parameters["freezed_components"].split(";"),
-        None if model_parameters["checkpoint"] == "None" \
+        None if model_parameters["checkpoint"] == "None"
             else model_parameters["checkpoint"]
     )
 
