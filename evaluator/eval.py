@@ -4,7 +4,9 @@ orchestrate the evaluation
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from utilities.gerneral_io_utils import write_table
 from evaluator.metrics import SemanticSimilarityMetric, Metric
+from utilities.cleaning_utils import limit_data
 from typing import Union
+import torch
 
 def run_evaluation(data: dict, model: AbstractiveSummarizer, metric, out_dir, samples: int, base_model: AbstractiveSummarizer = None):
     """
@@ -33,9 +35,10 @@ def calculate_scores(data: dict, metric: Metric, model: AbstractiveSummarizer, b
     :return:
     """
     # calculate predictions
-    source_texts = model.tokenizer.batch_decode(data['source']['input_ids'])
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+    source_texts = model.tokenizer.batch_decode(data['source']['input_ids'].to(device))
     predicted_summaries = model.predict(data['source'])
-    target_summaries = model.tokenizer.batch_decode(data['target']['input_ids'])
+    target_summaries = model.tokenizer.batch_decode(data['target']['input_ids'].to(device))
 
     # only if base model given
     if base_model:
@@ -81,22 +84,3 @@ def calculate_scores(data: dict, metric: Metric, model: AbstractiveSummarizer, b
 
     # produce overview as excel or csv
     write_table(overview_dict, out_dir, "Overwiew", "excel")
-
-
-def limit_data(data_dict: dict, limit: int = -1):
-    """
-    limit the evaluation samples
-    :param data_dict:
-    :param limit:
-    :return:
-    """
-    if limit == -1:
-        return data_dict
-
-    new_dict = dict()
-    for item in ["source", "target"]:
-        new_dict[item] = {
-            "input_ids": data_dict[item]['input_ids'][:limit],
-            "attention_mask": data_dict[item]['attention_mask'][:limit]
-        }
-    return new_dict
