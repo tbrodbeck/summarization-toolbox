@@ -46,3 +46,21 @@ def truncate_incomplete_sentences(text: str, nlp) -> str:
                 return text
             else:
                 return text[:sentences[-2].end_char]
+
+def limit_data(data_dict: dict, limit: int = -1):
+    """
+    limit the evaluation samples
+    :param data_dict:
+    :param limit:
+    :return:
+    """
+    if limit == -1:
+        return data_dict
+
+    new_dict = dict()
+    for item in ["source", "target"]:
+        new_dict[item] = {
+            "input_ids": data_dict[item]['input_ids'][:limit],
+            "attention_mask": data_dict[item]['attention_mask'][:limit]
+        }
+    return new_dict

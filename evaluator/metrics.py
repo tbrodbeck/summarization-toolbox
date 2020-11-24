@@ -13,8 +13,8 @@ class SemanticSimilarityMetric:
     def __init__(self, language: str):
 
         assert language in ["english", "german"]
-
-        self.transformer = sentence_transformers.SentenceTransformer("bert-base-nli-stsb-mean-tokens")
+        self.device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+        self.transformer = sentence_transformers.SentenceTransformer("bert-base-nli-stsb-mean-tokens").to(self.device)
         self.cosine_similarity = torch.nn.CosineSimilarity(dim=1, eps=1e-6)
 
         if language == "english":

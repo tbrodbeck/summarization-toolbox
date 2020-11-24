@@ -34,7 +34,7 @@ MODEL_CONFIG = [
 EVALUTATION_CONFIG = [
     "metric",
     "output_directory",
-    "samples",
+    "number_samples",
     "reference_model"
 ]
 
@@ -104,7 +104,7 @@ def evaluate(data_set_name: str, model_name: str, config_path: str = "./evaluato
     if not check_make_dir(out_dir, create_dir=True):
         log(f"Created output directory'{out_dir}'")
 
-    samples = int(evaluation_parameters['samples'])
+    samples = int(evaluation_parameters['number_samples'])
 
     ###################################
     # Load evaluation data

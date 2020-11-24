@@ -149,6 +149,9 @@ class AbstractiveSummarizer:
 
         :return:
         '''
+        self.model.eval()
+        self.model.to(self.device)
+
         if isinstance(source, dict):
             model_inputs = list()
             n_tokens = list()
@@ -175,7 +178,7 @@ class AbstractiveSummarizer:
         summary_texts = list()
         for tokens, upper_bound, lower_bound in zip(model_inputs, upper_bounds, lower_bounds):
             summary_ids = self.model.generate(
-             tokens,
+             tokens.to(self.device),
              num_beams=5,
              no_repeat_ngram_size=2,
              min_length=lower_bound,

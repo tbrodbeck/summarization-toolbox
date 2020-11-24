@@ -57,7 +57,8 @@ TRAINING_CONFIG = [
     "epochs",
     "train_batch_size",
     "val_batch_size",
-    "checkpoint_steps"
+    "checkpoint_steps",
+    "number_samples"
 ]
 
 DATA_DIRECTORY = "./dataProvider/datasets/"
@@ -92,13 +93,11 @@ def initialize_trainer(dataset_name: str, model_name: str, config_name: str = "f
 
     # check tensors folder
     dataset_dir = os.path.join(DATA_DIRECTORY, dataset_name)
-    model_folder = model_name.split("/")[0]
-    tensor_folder = model_name.split("/")[1]
     try:
-        tensor_dir = os.path.join(dataset_dir, model_folder, tensor_folder)
+        tensor_dir = os.path.join(dataset_dir, model_name)
         assert os.path.isdir(tensor_dir)
     except:
-        tensor_dir = os.path.join(dataset_dir, model_folder, tensor_folder + "_filtered")
+        tensor_dir = os.path.join(dataset_dir, model_name + "_filtered")
         assert os.path.isdir(tensor_dir), f"Neither '{tensor_dir} nor '{tensor_dir}_filtered' exists!"
 
 
