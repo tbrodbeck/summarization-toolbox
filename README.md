@@ -85,7 +85,7 @@ Performs training process for selected model on the previously created data sets
 To execute the __Model Training__ you need to previously run the __Data Provider__ module to generate training data in the right format either from your own or predefined text/summary pairs.
 It requires files in the output format of the __Data Provider__ module. Since you could have run the module for multiple text/summary sets, you have to provide the `$DATASETNAME` to train on.  
 Additionally you can choose a supported 🤗-Model with the `$MODELNAME` parameter (the model will be downloaded to your virtual environment if you run the training for the first time).
-Since all model and training pipeline configurations are read from a config file (which has to be stored in the _./config_ directory) you might also select your config file by setting the `$CONFIGNAME` parameter.  
+Since all model and training pipeline configurations are read from a config file (which has to be stored in the _./modelTrainer/config_ directory) you might also select your config file by setting the `$CONFIGNAME` parameter.  
 If you don't do so, this parameter defaults to _'fine_tuning.ini'_ (which could also be used as a template for your own configurations).
 
 ### Usage
@@ -122,10 +122,47 @@ After the training the following final output files are saved in the _<model_ver
 - _pytorch_model.bin_ (model which can then be loaded for inference)
 
 ## Evaluator
-Example command:
-```sh
-python evaluator/main.py modelTrainer/results/t5-de/0/config.json WikinewsSum/t5-base-multi-de-wiki-news t5-base golem
+
+Performs evaluation on the test set for the fine-tuned model (produced in modelTraining).  
+There are different evaluation methods available
+
+### Input
+
+To execute the __Evaluation__ you need to previously run the __Model Trainer__ module to generate a fine-tuned  🤗-Model in the right format and stored in the correct folder structure.
+It requires a model stored in the following structure:
 ```
+modelTrainer
+    └── results
+        └── logs
+        └── <model_short_name>
+            └── <version>
+                └── checkpoint-<checkpoint_number> or "model files"
+            
+```
+By "model files" these three files are required:
+- config.json
+- pytorch_model.bin
+- training_args.bin
+
+Since the model evaluation uses the test set created for the underlying training data you need to specify the `$DATASETNAME`.  
+Additionally you can choose the fine-tuned 🤗-Model with the `$MODELNAME` parameter.  
+All model and evaluation pipeline configurations are read from a config file (which has to be stored in the _./evaluator/config_ directory) you might also select your config file by setting the `$CONFIGNAME` parameter.  
+If you don't do so, this parameter defaults to _'evaluation_config.ini'_ (which could also be used as a template for your own configurations).
+
+### Usage
+
+Use the Command Line Interface like this:
+
+```sh
+python evaluator/main.py $DATASETNAME $MODELNAME $CONFIGNAME
+```
+
+### Configurations
+
+The pipeline is designed to inherit all customizable parameters from an _'.ini'_ file.
+It follows the structure that a component is defined by `[COMPONENT]` and the assigned parameters by `parameter = parameter_value` (as string).
+Only the parameters in the provided _'evaluation_config.ini'_ file stored in the _config_ folders can be changed.
+
 
 ## Development Instructions
 
