@@ -5,9 +5,9 @@ using the T5 model
 
 import os
 import spacy
-from timelogging.timeLog import log
 from transformers import AutoModelWithLMHead, AutoTokenizer, BatchEncoding
 import torch
+from timelogging.timeLog import log
 from typing import Union
 from utilities.gerneral_io_utils import check_make_dir
 from utilities.cleaning_utils import truncate_incomplete_sentences
@@ -161,7 +161,7 @@ class AbstractiveSummarizer:
             return_string = False
         elif isinstance(source, str):
             # tokenize text for model
-            model_inputs = [self.tokenizer.encode(source, padding="max_length", truncation="longest_first" ,return_tensors="pt").to(self.device)]
+            model_inputs = [self.tokenizer.encode(source, padding="max_length", truncation="longest_first", return_tensors="pt").to(self.device)]
             n_tokens = [len([i for i in model_inputs[0]['input_ids'] if i != 0])]
 
             return_string = True
