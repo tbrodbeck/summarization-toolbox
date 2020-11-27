@@ -92,7 +92,7 @@ def predict(modelPaths: List):
     for modelPath in modelPaths:
         pass
 
-def evaluate(runPath: str, tokenizerName: str, datasetName: str, language: str, ):
+def newEval(runPath: str, tokenizerName: str, datasetName: str, language: str, ):
     evaluation_parameters = {
         "language": "german",
         "checkpointEvaluation": False,
