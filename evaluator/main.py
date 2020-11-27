@@ -88,11 +88,11 @@ def evaluate(data_set_name: str, modelDir: str, model_name: str, evaluation_para
 
     run_evaluation(evaluation_dict, model, metric, out_dir, samples, reference_model)
 
-def predict(modelPaths: List):
-    for modelPath in modelPaths:
-        pass
+# def predict(modelPaths: List):
+#     for modelPath in modelPaths:
+#         pass
 
-def newEval(runPath: str, tokenizerName: str, datasetName: str, language: str, ):
+def evaluate2(runPath: str, tokenizerName: str, datasetName: str):
     evaluation_parameters = {
         "language": "german",
         "checkpointEvaluation": False,
@@ -100,23 +100,24 @@ def newEval(runPath: str, tokenizerName: str, datasetName: str, language: str, )
         "number_samples": 5,
         "reference_model": True,
     }
-    dataDir = f'dataProvider/datasets/{datasetName}/'
-    sourceText = read_single_txt('{}{}.{}'.format(dataDir, 'val', 'source'))
-    targetText = read_single_txt('{}{}.{}'.format(dataDir, 'val', 'target'))
-    walk = os.walk(runPath)
-    try:  # collects checkpoints if the run contains checkpoints
-        _, models, _ = next(walk)
-        log('Checkpoints:', models)
-        modelPaths = []
-        for checkpoint in models:
-            modelPaths.append(runPath + '/' + checkpoint)
-            predict(modelPaths)
-    except StopIteration:  # else just take the run path as model path
-        log('no checkpoints')
-        modelPaths = [runPath]
-    predict(modelPaths)
+    evaluate(data_set_name=datasetName, modelDir=runPath, model_name=tokenizerName, evaluation_parameters=evaluation_parameters)
+    # dataDir = f'dataProvider/datasets/{datasetName}/'
+    # sourceText = read_single_txt('{}{}.{}'.format(dataDir, 'val', 'source'))
+    # targetText = read_single_txt('{}{}.{}'.format(dataDir, 'val', 'target'))
+    # walk = os.walk(runPath)
+    # try:  # collects checkpoints if the run contains checkpoints
+    #     _, models, _ = next(walk)
+    #     log('Checkpoints:', models)
+    #     modelPaths = []
+    #     for checkpoint in models:
+    #         modelPaths.append(runPath + '/' + checkpoint)
+    #         predict(modelPaths)
+    # except StopIteration:  # else just take the run path as model path
+    #     log('no checkpoints')
+    #     modelPaths = [runPath]
+    # predict(modelPaths)
 
 
 
 if __name__ == '__main__':
-  fire.Fire(evaluate)
+  fire.Fire(evaluate2)
