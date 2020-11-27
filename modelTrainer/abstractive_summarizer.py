@@ -18,11 +18,12 @@ class AbstractiveSummarizer:
     class for abstractive text summarization
     """
 
-    def __init__(self, language: str, status: str = 'base', model_dir: str = './results', version: int = None, freezed_layers: list = None, checkpoint: int = None):
+    def __init__(self, model_dir: str, language: str, status: str = 'base', freezed_layers: list = None):
         """
         define model
         """
         self.model_path = model_dir
+
         assert language in ["english", "german"], \
             f"{language} is not a supported language!"
         self.language = language
@@ -65,10 +66,12 @@ class AbstractiveSummarizer:
             self.device = torch.device("cpu")
         log(f"{self.device} available")
 
+        #TODO: extract as normal method
         # freeze layers not to train
         if freezed_layers:
             self.freeze_model_layers(freezed_layers)
 
+        #TODO: set parameter in methode itself
         # upper and lower bound for produced
         # summary (found by data analysis)
         self.upper_token_ratio = 0.15

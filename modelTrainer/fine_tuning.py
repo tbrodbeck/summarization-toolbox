@@ -81,4 +81,7 @@ def fine_tune_model(summary_model, results_path: str, data_dict: dict, parameter
     trainer.train()
 
     # save the fine tuned model
-    trainer.save_model()
+    check_make_dir(final_path + "/final_model", True)
+    trainer.save_model(final_path + "/final_model")
+
+    #TODO: create info file at end of training
