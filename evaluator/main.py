@@ -4,70 +4,22 @@ import fire
 import os
 import torch
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
-from utilities.gerneral_io_utils import check_make_dir, read_config
+from utilities.gerneral_io_utils import check_make_dir, read_single_txt
 from evaluator.metrics import SemanticSimilarityMetric
 from evaluator.eval import run_evaluation
 from timelogging.timeLog import log
 
 DATA_DIR = "./dataProvider/datasets"
 
-MODEL_NAME = [
-    "t5-base",
-    "WikinewsSum/t5-base-multi-de-wiki-news"
-]
-
-# required parameters
-# for model
-MODEL_CONFIG = [
-    "language",
-    "version",
-    "status",
-    "model_directory",
-    "checkpoint"
-]
-
-# required parameters
-# for evaluation
-EVALUTATION_CONFIG = [
-"metric",
-    "output_directory",
-    "number_samples",
-    "reference_model"
-]
-
-def evaluate(data_set_name: str, model_name: str, config_path: str = "./evaluator/config/evaluation_config.ini"):
+def evaluate(data_set_name: str, modelDir: str, model_name: str, evaluation_parameters):
     """
     run evaluation
-    :param reference_to_base:
+    :param reference_to_base: 
     :param data_set_name:
     :param model_name:
     :param config_path:
     :return:
     """
-
-    ###################################
-    # Read from config
-    ###################################
-    MODEL, EVALUATION = read_config(
-        config_path
-    )
-
-    # model parameters
-    model_parameters = dict()
-    for parameter_name in MODEL_CONFIG:
-        if MODEL[parameter_name]:
-            model_parameters[parameter_name] = MODEL[parameter_name]
-
-    print("\n")
-    log("\nReceived parameters for model:")
-    for p in model_parameters:
-        log(f"- {p}: {model_parameters[p]}")
-    print("\n")
-
-    evaluation_parameters = dict()
-    for parameter_name in EVALUTATION_CONFIG:
-        if EVALUATION[parameter_name]:
-            evaluation_parameters[parameter_name] = EVALUATION[parameter_name]
 
     print("\n")
     log("Received parameters for evaluation:")
@@ -78,19 +30,15 @@ def evaluate(data_set_name: str, model_name: str, config_path: str = "./evaluato
     # Initialize model
     ###################################
     model = AbstractiveSummarizer(
-        model_parameters["language"],
-        model_parameters["status"],
-        model_parameters["model_directory"],
-        int(model_parameters["version"]),
-        checkpoint=None if model_parameters["checkpoint"] == "None"
-            else model_parameters["checkpoint"]
+        evaluation_parameters["language"],
+        modelDir
     )
 
     # initialize reference model
 
     if evaluation_parameters["reference_model"] == "True":
         reference_model = AbstractiveSummarizer(
-            model_parameters["language"],
+            evaluation_parameters["language"],
             "base"
         )
     else:
@@ -136,9 +84,38 @@ def evaluate(data_set_name: str, model_name: str, config_path: str = "./evaluato
 
     metric = None
     if evaluation_parameters["metric"] == "SemanticSimilarity":
-        metric = SemanticSimilarityMetric(model_parameters["language"])
+        metric = SemanticSimilarityMetric(evaluation_parameters["language"])
 
     run_evaluation(evaluation_dict, model, metric, out_dir, samples, reference_model)
+
+def predict(modelPaths: List):
+    for modelPath in modelPaths:
+        pass
+
+def evaluate(runPath: str, tokenizerName: str, datasetName: str, language: str, ):
+    evaluation_parameters = {
+        "language": "german",
+        "checkpointEvaluation": False,
+        "output_directory": "evaluator/output",
+        "number_samples": 5,
+        "reference_model": True,
+    }
+    dataDir = f'dataProvider/datasets/{datasetName}/'
+    sourceText = read_single_txt('{}{}.{}'.format(dataDir, 'val', 'source'))
+    targetText = read_single_txt('{}{}.{}'.format(dataDir, 'val', 'target'))
+    walk = os.walk(runPath)
+    try:  # collects checkpoints if the run contains checkpoints
+        _, models, _ = next(walk)
+        log('Checkpoints:', models)
+        modelPaths = []
+        for checkpoint in models:
+            modelPaths.append(runPath + '/' + checkpoint)
+            predict(modelPaths)
+    except StopIteration:  # else just take the run path as model path
+        log('no checkpoints')
+        modelPaths = [runPath]
+    predict(modelPaths)
+
 
 
 if __name__ == '__main__':

@@ -22,6 +22,7 @@ class AbstractiveSummarizer:
         """
         define model
         """
+        self.model_path = model_dir
         assert language in ["english", "german"], \
             f"{language} is not a supported language!"
         self.language = language
@@ -42,19 +43,6 @@ class AbstractiveSummarizer:
             log(f"You chose status '{self.status}'. "
                 f"Pre-trained '{self.model_name}' is loaded.")
         else:
-            if checkpoint:
-                self.model_path = os.path.join(
-                    model_dir,
-                    self.short_name,
-                    str(version),
-                    f"checkpoint-{checkpoint}"
-                )
-            else:
-                self.model_path = os.path.join(
-                    model_dir,
-                    self.short_name,
-                    str(version)
-                )
             assert check_make_dir(self.model_path), \
                 f"Directory '{self.model_path}' doesn't exist! Please follow this folder structure."
             log(f"You chose status '{self.status}'. "
