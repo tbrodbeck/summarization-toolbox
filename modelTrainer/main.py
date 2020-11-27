@@ -167,14 +167,9 @@ def initialize_trainer(dataset_name: str, model_name: str, config_name: str = "f
 
     # initialize summary model
     model = AbstractiveSummarizer(
-        model_parameters["language"],
-        model_parameters["status"],
         model_parameters["model_directory"],
-        int(model_parameters["version"]),
-        None if model_parameters["freezed_components"] == "None"
-            else model_parameters["freezed_components"].split(";"),
-        None if model_parameters["checkpoint"] == "None"
-            else model_parameters["checkpoint"]
+        model_parameters["language"],
+        model_parameters["status"]
     )
 
     ###################################
