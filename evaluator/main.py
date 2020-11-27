@@ -30,12 +30,12 @@ def evaluate(data_set_name: str, modelDir: str, model_name: str, evaluation_para
     # Initialize model
     ###################################
     model = AbstractiveSummarizer(
+        modelDir,
         evaluation_parameters["language"],
-        modelDir
+        status="fine-tuned"
     )
 
     # initialize reference model
-
     if evaluation_parameters["reference_model"] == "True":
         reference_model = AbstractiveSummarizer(
             evaluation_parameters["language"],
@@ -58,12 +58,10 @@ def evaluate(data_set_name: str, modelDir: str, model_name: str, evaluation_para
     assert check_make_dir(data_set_dir), f"Data set '{data_set_name}' not directory '{DATA_DIR}'. " \
                                          f"Please store data there!"
 
-    model_folder = model_name.split("/")[0]
-    tensor_folder = model_name.split("/")[1]
+
     tensor_dir = os.path.join(
         data_set_dir,
-        model_folder,
-        tensor_folder
+        model_name
     )
     try:
         assert check_make_dir(tensor_dir) and os.listdir(tensor_dir)
@@ -95,10 +93,10 @@ def evaluate(data_set_name: str, modelDir: str, model_name: str, evaluation_para
 def defau(model_path: str, tokenizer_name: str, dataset_name: str, language="german", checkpointEval=False, output_dir="evaluator/output", number_samples=5, reference_model=False):
     evaluation_parameters = {
         "language": "german",
-        "checkpointEvaluation": False,
         "output_directory": "evaluator/output",
         "number_samples": 5,
         "reference_model": True,
+        "metric": "SemanticSimilarity"
     }
     evaluate(data_set_name=dataset_name, modelDir=model_path, model_name=tokenizer_name, evaluation_parameters=evaluation_parameters)
     # dataDir = f'dataProvider/datasets/{datasetName}/'
