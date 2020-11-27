@@ -178,6 +178,15 @@ def check_make_dir(dir_or_file: str, create_dir: bool = False) -> bool:
         else:
             return True
 
+def getSubDirectories(directory: str) -> List[str]:
+    walk = os.walk(directory)
+    _, subDirs, _ = next(walk)
+    log('Checkpoints:', subDirs)
+    subPaths = []
+    for subDir in subDirs:
+        subPaths.append(directory + '/' + subDir)
+    return subPaths
+
 
 def write_txt(file_path: str, texts: List[str]):
   """

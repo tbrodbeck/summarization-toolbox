@@ -92,7 +92,7 @@ def evaluate(data_set_name: str, modelDir: str, model_name: str, evaluation_para
 #     for modelPath in modelPaths:
 #         pass
 
-def evaluate2(runPath: str, tokenizerName: str, datasetName: str):
+def defau(model_path: str, tokenizer_name: str, dataset_name: str, language="german", checkpointEval=False, output_dir="evaluator/output", number_samples=5, reference_model=False):
     evaluation_parameters = {
         "language": "german",
         "checkpointEvaluation": False,
@@ -100,7 +100,7 @@ def evaluate2(runPath: str, tokenizerName: str, datasetName: str):
         "number_samples": 5,
         "reference_model": True,
     }
-    evaluate(data_set_name=datasetName, modelDir=runPath, model_name=tokenizerName, evaluation_parameters=evaluation_parameters)
+    evaluate(data_set_name=dataset_name, modelDir=model_path, model_name=tokenizer_name, evaluation_parameters=evaluation_parameters)
     # dataDir = f'dataProvider/datasets/{datasetName}/'
     # sourceText = read_single_txt('{}{}.{}'.format(dataDir, 'val', 'source'))
     # targetText = read_single_txt('{}{}.{}'.format(dataDir, 'val', 'target'))
@@ -116,7 +116,6 @@ def evaluate2(runPath: str, tokenizerName: str, datasetName: str):
     #     log('no checkpoints')
     #     modelPaths = [runPath]
     # predict(modelPaths)
-
 
 
 if __name__ == '__main__':
