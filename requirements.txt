@@ -1,12 +1,15 @@
+environs
 fire==0.3.1
 numpy==1.18.4
 openpyxl==3.0.5
 pandas==1.0.3
+pytest
+pyyaml
 rouge==1.0.0
 scikit-learn==0.23.1
 sentence-transformers==0.3.5.1
 spacy==2.3.0
-timelogging==2.0.7
+timelogging
 torch==1.5.1
 tqdm==4.46.0
 transformers==3.0.2
