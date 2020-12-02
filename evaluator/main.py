@@ -101,13 +101,13 @@ def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples: int 
         dataset_name (str): Name of dataset. E.g. `golem`
         nr_samples (int): Number of samples to evaluate on
     """
-    model_info = eval_util.Model_Info_Reader(run_path)
+    model_info = eval_util.ModelInfoReader(run_path)
     evaluation_basepath = f'evaluator/evaluations/{model_info.run_name}'
     run_path_walk = os.walk(run_path)
     _, checkpoint_dirs, _ = next(run_path_walk)
     for checkpoint_dir in checkpoint_dirs:
         log(f'Evaluating {checkpoint_dir}...')
-        modelPath = os.path.join(run_path, checkpoint_dir)
-        evaluate(modelPath, dataset_name, model_info.language, model_info.model_name, output_dir=f"{evaluation_basepath}/{checkpoint_dir}", number_samples=nr_samples)
+        checkpoint_model_path = os.path.join(run_path, checkpoint_dir)
+        evaluate(checkpoint_model_path, dataset_name, model_info.language, model_info.model_name, output_dir=f"{evaluation_basepath}/{checkpoint_dir}", number_samples=nr_samples)
     log(f'Evaluating final model...')
     evaluate(run_path, dataset_name, model_info.language, model_info.model_name, output_dir=evaluation_basepath, number_samples=nr_samples)

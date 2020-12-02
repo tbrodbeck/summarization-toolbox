@@ -1,7 +1,7 @@
 import os
 import yaml
 
-class Model_Info_Reader():
+class ModelInfoReader():
   def __init__(self, run_path):
     self.language, self.model_name, self.run_name = self.read_model_info(run_path)
 
