@@ -13,7 +13,6 @@ class Test_Model_Info_Reader(unittest.TestCase):
     self.model_info_reader = Model_Info_Reader(self.run_path)
     self.model_info_reader_with_checkpoints = Model_Info_Reader(self.run_path_with_checkpoint)
 
-
   def test_read_model_info(self):
     assert type(self.model_info_reader.language) == str
     assert type(self.model_info_reader.model_name) == str
