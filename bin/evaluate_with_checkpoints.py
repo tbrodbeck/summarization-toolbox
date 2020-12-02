@@ -1,3 +1,4 @@
+#!python
 import sys
 sys.path.append(".")
 from evaluator.main import evaluate_with_checkpoints

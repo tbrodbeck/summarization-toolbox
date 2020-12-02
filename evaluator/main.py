@@ -108,6 +108,6 @@ def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples: int 
     for checkpoint_dir in checkpoint_dirs:
         log(f'Evaluating {checkpoint_dir}...')
         modelPath = os.path.join(run_path, checkpoint_dir)
-        evaluate(modelPath, dataset_name, output_dir=f"{evaluation_basepath}/{checkpoint_dir}", number_sample=nr_samples)
+        evaluate(modelPath, dataset_name, language=model_info.language, model_name=model_info.model_name, output_dir=f"{evaluation_basepath}/{checkpoint_dir}", number_samples=nr_samples)
     log(f'Evaluating final model...')
-    evaluate(run_path, dataset_name, model_info.language, model_info.model_name, output_dir=evaluation_basepath, number_sample=nr_samples)
+    evaluate(run_path, dataset_name, language=model_info.language, model_name=model_info.model_name, output_dir=evaluation_basepath, number_samples=nr_samples)
