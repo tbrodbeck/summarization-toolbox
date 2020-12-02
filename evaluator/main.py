@@ -103,8 +103,8 @@ def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples: int 
     """
     model_info = eval_util.Model_Info_Reader(run_path)
     evaluation_basepath = f'evaluator/evaluations/{model_info.run_name}'
-    walk = os.walk(run_path)
-    _, checkpoint_dirs, _ = next(walk)
+    run_path_walk = os.walk(run_path)
+    _, checkpoint_dirs, _ = next(run_path_walk)
     for checkpoint_dir in checkpoint_dirs:
         log(f'Evaluating {checkpoint_dir}...')
         modelPath = os.path.join(run_path, checkpoint_dir)
