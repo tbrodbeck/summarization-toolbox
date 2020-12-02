@@ -1,5 +1,5 @@
 import environs
-from evaluator.eval_util import Model_Info_Reader
+from evaluator.eval_util import ModelInfoReader
 from timelogging.timeLog import log
 import unittest
 
@@ -10,8 +10,8 @@ class Test_Model_Info_Reader(unittest.TestCase):
     env.read_env()
     self.run_path = env('oneDriveDir') + 'studyProjectLuca/results/t5-de/0'
     self.run_path_with_checkpoint = self.run_path + '/checkpoint-5000'
-    self.model_info_reader = Model_Info_Reader(self.run_path)
-    self.model_info_reader_with_checkpoints = Model_Info_Reader(self.run_path_with_checkpoint)
+    self.model_info_reader = ModelInfoReader(self.run_path)
+    self.model_info_reader_with_checkpoints = ModelInfoReader(self.run_path_with_checkpoint)
 
   def test_read_model_info(self):
     assert type(self.model_info_reader.language) == str
