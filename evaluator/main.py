@@ -1,26 +1,33 @@
 import sys
 sys.path.append(".")
-import fire
 import os
 import torch
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from utilities.gerneral_io_utils import check_make_dir, read_single_txt
 from evaluator.metrics import SemanticSimilarityMetric
 from evaluator.eval import run_evaluation
+from evaluator import eval_util
 from timelogging.timeLog import log
 
 DATA_DIR = "./dataProvider/datasets"
 
-def evaluate(data_set_name: str, modelDir: str, model_name: str, evaluation_parameters):
+def evaluate(model_dir: str, data_set_name: str, language: str, model_name: str, output_dir="evaluator/output", number_samples=5, reference_model=True, metric="SemanticSimilarity"):
     """
     run evaluation
-    :param reference_to_base: 
+    :param reference_to_base:
     :param data_set_name:
     :param model_name:
     :param config_path:
     :return:
     """
 
+    evaluation_parameters = {
+        "language": language,
+        "output_directory": output_dir,
+        "number_samples": number_samples,
+        "reference_model": False,
+        "metric": metric
+    }
     print("\n")
     log("Received parameters for evaluation:")
     for p in evaluation_parameters:
@@ -30,7 +37,7 @@ def evaluate(data_set_name: str, modelDir: str, model_name: str, evaluation_para
     # Initialize model
     ###################################
     model = AbstractiveSummarizer(
-        modelDir,
+        model_dir,
         evaluation_parameters["language"],
         status="fine-tuned"
     )
@@ -70,8 +77,8 @@ def evaluate(data_set_name: str, modelDir: str, model_name: str, evaluation_para
         assert check_make_dir(tensor_dir) and os.listdir(tensor_dir), \
             f"Neither '{tensor_dir.rstrip('_filtered')}' not '{tensor_dir}' does exist or it is empty!"
 
-    source_path = os.path.join(tensor_dir, "test_source.pt")
-    target_path = os.path.join(tensor_dir, "test_target.pt")
+    source_path = os.path.join(tensor_dir, "val_source.pt")
+    target_path = os.path.join(tensor_dir, "val_target.pt")
     assert os.path.isfile(source_path) and os.path.isfile(target_path), \
         f"Data pair '{source_path}' and '{target_path}' does not exist!"
 
@@ -86,35 +93,21 @@ def evaluate(data_set_name: str, modelDir: str, model_name: str, evaluation_para
 
     run_evaluation(evaluation_dict, model, metric, out_dir, samples, reference_model)
 
-# def predict(modelPaths: List):
-#     for modelPath in modelPaths:
-#         pass
+def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples: int = 10):
+    """ Considers all checkpoints and final model for evaluation generation
 
-def defau(model_path: str, tokenizer_name: str, dataset_name: str, language="german", checkpointEval=False, output_dir="evaluator/output", number_samples=5, reference_model=False):
-    evaluation_parameters = {
-        "language": "german",
-        "output_directory": "evaluator/output",
-        "number_samples": 5,
-        "reference_model": True,
-        "metric": "SemanticSimilarity"
-    }
-    evaluate(data_set_name=dataset_name, modelDir=model_path, model_name=tokenizer_name, evaluation_parameters=evaluation_parameters)
-    # dataDir = f'dataProvider/datasets/{datasetName}/'
-    # sourceText = read_single_txt('{}{}.{}'.format(dataDir, 'val', 'source'))
-    # targetText = read_single_txt('{}{}.{}'.format(dataDir, 'val', 'target'))
-    # walk = os.walk(runPath)
-    # try:  # collects checkpoints if the run contains checkpoints
-    #     _, models, _ = next(walk)
-    #     log('Checkpoints:', models)
-    #     modelPaths = []
-    #     for checkpoint in models:
-    #         modelPaths.append(runPath + '/' + checkpoint)
-    #         predict(modelPaths)
-    # except StopIteration:  # else just take the run path as model path
-    #     log('no checkpoints')
-    #     modelPaths = [runPath]
-    # predict(modelPaths)
-
-
-if __name__ == '__main__':
-  fire.Fire(evaluate2)
+    Args:
+        runPath (str): Path of run. E.g. `modelTrainer/results/t5-de/0`
+        dataset_name (str): Name of dataset. E.g. `golem`
+        nr_samples (int): Number of samples to evaluate on
+    """
+    model_info = eval_util.Model_Info_Reader(run_path)
+    evaluation_basepath = f'evaluator/evaluations/{model_info.run_name}'
+    walk = os.walk(run_path)
+    _, checkpoint_dirs, _ = next(walk)
+    for checkpoint_dir in checkpoint_dirs:
+        log(f'Evaluating {checkpoint_dir}...')
+        modelPath = os.path.join(run_path, checkpoint_dir)
+        evaluate(modelPath, dataset_name, output_dir=f"{evaluation_basepath}/{checkpoint_dir}", number_sample=nr_samples)
+    log(f'Evaluating final model...')
+    evaluate(run_path, dataset_name, model_info.language, model_info.model_name, output_dir=evaluation_basepath, number_sample=nr_samples)
