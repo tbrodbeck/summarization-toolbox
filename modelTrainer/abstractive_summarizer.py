@@ -71,12 +71,6 @@ class AbstractiveSummarizer:
         if freezed_layers:
             self.freeze_model_layers(freezed_layers)
 
-        #TODO: set parameter in methode itself
-        # upper and lower bound for produced
-        # summary (found by data analysis)
-        self.upper_token_ratio = 0.15
-        self.lower_token_ratio = 0.05
-
 
     def initialize_model(self):
         """
@@ -131,7 +125,11 @@ class AbstractiveSummarizer:
                 log(f"freezed {model_component} layers")
 
 
-    def predict(self, source: Union[str, dict], truncation: bool = True) -> Union[list, str]:
+    def predict(self,
+                source: Union[str, dict],
+                truncation: bool = True,
+                upper_token_ratio: float = 0.15,
+                lower_token_ratio: float = 0.05) -> Union[list, str]:
         '''
         predict a summary based on
         the given text
@@ -155,15 +153,15 @@ class AbstractiveSummarizer:
             return_string = False
         elif isinstance(source, str):
             # tokenize text for model
-            model_inputs = [self.tokenizer.encode(source, padding="max_length", truncation="longest_first", return_tensors="pt").to(self.device)]
-            n_tokens = [len([i for i in model_inputs[0]['input_ids'] if i != 0])]
+            model_inputs = [self.tokenizer(source, padding="max_length", truncation="longest_first", return_tensors="pt").to(self.device)['input_ids']]
+            n_tokens = [len([i for i in model_inputs[0].squeeze().numpy() if i != 0])]
 
             return_string = True
         else:
             raise ValueError("Input to 'predict' has to be str or dict!")
 
-        upper_bounds = [int(n * self.upper_token_ratio) for n in n_tokens]
-        lower_bounds = [int(n * self.lower_token_ratio) for n in n_tokens]
+        upper_bounds = [int(n * upper_token_ratio) for n in n_tokens]
+        lower_bounds = [int(n * lower_token_ratio) for n in n_tokens]
 
         # produce summary
         summary_texts = list()
