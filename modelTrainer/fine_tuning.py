@@ -4,25 +4,32 @@ script to fine tune a huggingface model
 
 import os
 from timelogging.timeLog import log
-from modelTrainer.data_set_creation import create_dataset
 from transformers import Trainer, TrainingArguments
-from utilities.gerneral_io_utils import check_make_dir
+import yaml
+from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
+from modelTrainer.data_set_creation import create_dataset
+from utilities.general_io_utils import check_make_dir
 from utilities.cleaning_utils import limit_data
 
 
-def fine_tune_model(summary_model, results_path: str, data_dict: dict, parameters: dict):
-    """
-    fine tuning pipeline for the summary model
-    :param summary_model:
-    :param results_path:
-    :param data_dict:
-    :param parameters:
-    :return:
+def fine_tune_model(
+        summary_model: AbstractiveSummarizer,
+        results_path: str,
+        data_dict: dict,
+        parameters: dict):
+    """fine tuning pipeline that runs the training
+
+    Args:
+        summary_model (AbstractiveSummarizer): model to train on
+        results_path (str): store resulting models and checkpoints
+        data_dict (dict): data for training and optional evaluation
+        parameters (dict): training parameters
     """
 
     # limit samples taken into
     # account for training
-    data_dict["train"] = limit_data(data_dict["train"], int(parameters["number_samples"]))
+    data_dict["train"] = limit_data(
+        data_dict["train"], int(parameters["number_samples"]))
 
     # get dataset
     if "val" in data_dict:
@@ -56,10 +63,13 @@ def fine_tune_model(summary_model, results_path: str, data_dict: dict, parameter
     # initialize the training parameters
     training_args = TrainingArguments(
         output_dir=final_path,  # output directory
-        num_train_epochs=int(parameters["epochs"]),  # total number of training epochs
-        per_device_train_batch_size=int(parameters["train_batch_size"]),  # batch size per device during training
-        per_device_eval_batch_size=int(parameters["val_batch_size"]) if val_data else None,  # batch size for evaluation
-        do_eval=True if val_data else False,
+        # total number of training epochs
+        num_train_epochs=int(parameters["epochs"]),
+        # batch size per device during training
+        per_device_train_batch_size=int(parameters["train_batch_size"]),
+        per_device_eval_batch_size=int(
+            parameters["val_batch_size"]) if val_data else None,  # batch size for evaluation
+        do_eval=bool(val_data),
         eval_steps=500,
         warmup_steps=500,  # number of warmup steps for learning rate scheduler
         weight_decay=0.01,  # strength of weight decay
@@ -84,4 +94,13 @@ def fine_tune_model(summary_model, results_path: str, data_dict: dict, parameter
     check_make_dir(final_path + "/final_model", True)
     trainer.save_model(final_path + "/final_model")
 
-    #TODO: create info file at end of training
+    # save info file
+    info_dict = {
+        "language": [summary_model.language],
+        "model_name": [summary_model.model_name],
+        "run_name": [summary_model.short_name + "/" + model_version],
+        "total_iterations": [int(len(train_data)/parameters["batch_size"])
+                             * parameters["epochs"]]
+    }
+    with open(final_path + "model_info.yml", "w") as info_file:
+        yaml.dump(info_dict, info_file)

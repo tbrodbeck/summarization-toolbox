@@ -3,24 +3,26 @@ main file wich runs the fine tuning pipeline:
 
 CLI:
 to provide pipeline parameters via CLI:
-python modelTrainer.mai.py -d DATASETNAME -m MODELNAME -c CONFIGNAME
+python modelTrainer.mai.py DATASETNAME MODELNAME
 """
+import os
+from typing import Optional
 import sys
 sys.path.append(".")
-import os
-import fire
 import torch
 from timelogging.timeLog import log
+import fire
+
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from modelTrainer.fine_tuning import fine_tune_model
-from utilities.gerneral_io_utils import read_config, check_make_dir
+from utilities.general_io_utils import read_config, check_make_dir
+
 
 CLI = [
     "dataset",
     "model",
     "config"
 ]
-
 
 MODEL_NAMES = [
     'WikinewsSum/t5-base-multi-de-wiki-news'
@@ -31,6 +33,7 @@ SPLIT_NAMES = [
     "val",
     "test"
 ]
+
 TEXT_NAMES = [
     'source',
     'target'
@@ -60,13 +63,18 @@ TRAINING_CONFIG = [
 
 DATA_DIRECTORY = "./dataProvider/datasets/"
 
-def initialize_trainer(dataset_name: str, model_name: str, config_name: str = "fine_tuning_config.ini"):
-    """
-    set up for training process
-    :param dataset_name:
-    :param model_name:
-    :param config_name:
-    :return:
+
+def initialize_trainer(
+        dataset_name: str,
+        model_name: str,
+        config_name: Optional[str] = "fine_tuning_config.ini"):
+    """fine tuning pipeline initialization
+
+    Args:
+        dataset_name (str): name of the dataset used for training
+        model_name (str): model to fine tune on
+        config_name (Optional[str], optional): name of config file.
+        Defaults to "fine_tuning_config.ini".
     """
     ###################################
     # Perform checks
@@ -93,10 +101,10 @@ def initialize_trainer(dataset_name: str, model_name: str, config_name: str = "f
     try:
         tensor_dir = os.path.join(dataset_dir, model_name)
         assert os.path.isdir(tensor_dir)
-    except:
+    except FileNotFoundError:
         tensor_dir = os.path.join(dataset_dir, model_name + "_filtered")
-        assert os.path.isdir(tensor_dir), f"Neither '{tensor_dir} nor '{tensor_dir}_filtered' exists!"
-
+        assert os.path.isdir(
+            tensor_dir), f"Neither '{tensor_dir} nor '{tensor_dir}_filtered' exists!"
 
     data_files = [file for file in os.listdir(tensor_dir)
                   if '.pt' in file]
@@ -151,15 +159,14 @@ def initialize_trainer(dataset_name: str, model_name: str, config_name: str = "f
         if MODEL[parameter_name]:
             model_parameters[parameter_name] = MODEL[parameter_name]
 
-    print("\n")
-    log("\nReceived parameters for model:")
-    for p in model_parameters:
-        log(f"- {p}: {model_parameters[p]}")
-    print("\n")
+    log("Received parameters for model:")
+    for param in model_parameters:
+        log(f"- {param}: {model_parameters[param]}")
 
     # check if output directory exists
     if not check_make_dir(model_parameters["output_directory"], create_dir=True):
-        log(f"Created output directory'{model_parameters['output_directory']}'")
+        log(
+            f"Created output directory'{model_parameters['output_directory']}'")
 
     ###################################
     # Initialize Model
@@ -182,12 +189,9 @@ def initialize_trainer(dataset_name: str, model_name: str, config_name: str = "f
         if TRAINING[parameter_name]:
             training_parameters[parameter_name] = TRAINING[parameter_name]
 
-    print("\n")
     log("Received parameters for training:")
-    for p in training_parameters:
-        log(f"- {p}: {training_parameters[p]}")
-
-    log("\n+++ FINE-TUNING +++")
+    for param in training_parameters:
+        log(f"- {param}: {training_parameters[param]}")
 
     fine_tune_model(
         model,
