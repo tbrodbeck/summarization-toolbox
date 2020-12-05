@@ -2,6 +2,7 @@ dataProvider/datasets
 results/
 .idea
 *.ipynb
+.vscode
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
