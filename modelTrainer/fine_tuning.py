@@ -88,19 +88,21 @@ def fine_tune_model(
     )
 
     # perform the training
-    trainer.train()
+    try:
+        trainer.train()
 
-    # save the fine tuned model
-    check_make_dir(final_path + "/final_model", True)
-    trainer.save_model(final_path + "/final_model")
+    finally:
+        # save info file
+        info_dict = {
+            "language": summary_model.language,
+            "model_name": summary_model.model_name,
+            "run_name": summary_model.short_name + "/" + str(model_version),
+            "total_iterations": int(len(train_data)/int(parameters["train_batch_size"]))
+                                 * int(parameters["epochs"])
+        }
 
-    # save info file
-    info_dict = {
-        "language": [summary_model.language],
-        "model_name": [summary_model.model_name],
-        "run_name": [summary_model.short_name + "/" + model_version],
-        "total_iterations": [int(len(train_data)/parameters["batch_size"])
-                             * parameters["epochs"]]
-    }
-    with open(final_path + "model_info.yml", "w") as info_file:
-        yaml.dump(info_dict, info_file)
+        with open(final_path + "/model_info.yml", "w") as info_file:
+            yaml.dump(info_dict, info_file)
+        # save the fine tuned model
+        check_make_dir(final_path + "/final_model", True)
+        trainer.save_model(final_path + "/final_model")

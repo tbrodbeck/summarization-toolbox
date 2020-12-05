@@ -95,7 +95,7 @@ def evaluate(
     )
     try:
         assert check_make_dir(tensor_dir) and os.listdir(tensor_dir)
-    except FileNotFoundError:
+    except Exception:
         tensor_dir += "_filtered"
         assert check_make_dir(tensor_dir) and os.listdir(tensor_dir), \
             f"Neither '{tensor_dir.rstrip('_filtered')}' \

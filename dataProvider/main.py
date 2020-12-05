@@ -2,16 +2,16 @@
 module to read dataset and bring it
 in the right format for training
 """
-from utilities.general_io_utils import read_single_txt, write_txt, \
-  assertDirExistent, assertFileInxestent, check_make_dir
 from typing import Optional
-import transformers
-from timelogging.timeLog import log
-import torch
-import numpy as np
-import fire
 import sys
 sys.path.append(".")
+import torch
+import transformers
+import numpy as np
+import fire
+from timelogging.timeLog import log
+from utilities.general_io_utils import read_single_txt, write_txt, \
+  assertDirExistent, assertFileInxestent, check_make_dir
 
 MODEL_NAMES = ['t5-base']
 SPLIT_NAMES = ['train', 'val', 'test']
@@ -57,7 +57,7 @@ def provide_data(
     if size and size < 1:
         raise ValueError('wrong size')
     dataset_dir = f'dataProvider/datasets/{dataset_name}/'
-    assertDirExistent(dataset_name)
+    assertDirExistent(dataset_dir)
 
     if create_splits:
         if create_splits == True:

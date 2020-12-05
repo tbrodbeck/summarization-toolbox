@@ -101,7 +101,7 @@ def initialize_trainer(
     try:
         tensor_dir = os.path.join(dataset_dir, model_name)
         assert os.path.isdir(tensor_dir)
-    except FileNotFoundError:
+    except Exception:
         tensor_dir = os.path.join(dataset_dir, model_name + "_filtered")
         assert os.path.isdir(
             tensor_dir), f"Neither '{tensor_dir} nor '{tensor_dir}_filtered' exists!"
