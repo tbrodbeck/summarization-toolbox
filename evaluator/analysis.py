@@ -30,9 +30,6 @@ class EvalRunAnalyzer():
   def get_eval_run_iterations(self, eval_run_dir: str) -> float:
     return float(eval_run_dir.split("-")[0])
 
-  def get_run_info(self):
-    return self.eval_run_info
-
 class EvaluationComparer():
   def __init__(self, eval_path: str, metrics_for_comparison: List[str] = ['gold_score', 'fine_tuned_score', 'summary_similarity_score']):
     self.eval_path = eval_path
@@ -42,7 +39,7 @@ class EvaluationComparer():
 
   def get_eval_run_info(self, eval_run_dir: str) -> Dict[str, float]:
     eval_run_analyzer = EvalRunAnalyzer(self.eval_path, eval_run_dir, self.metrics_for_comparison)
-    return eval_run_analyzer.get_run_info()
+    return eval_run_analyzer.eval_run_info
 
   def collect_evaluations(self):
     row_list = []
