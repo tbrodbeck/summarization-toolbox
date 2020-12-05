@@ -3,6 +3,7 @@ fire==0.3.1
 numpy==1.18.4
 openpyxl==3.0.5
 pandas==1.0.3
+pyqt5
 pytest
 pyyaml
 rouge==1.0.0
@@ -13,3 +14,4 @@ timelogging
 torch==1.5.1
 tqdm==4.46.0
 transformers==3.0.2
+xlrd
