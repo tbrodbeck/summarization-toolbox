@@ -19,8 +19,13 @@ class AbstractiveSummarizer:
     """
 
     def __init__(self, model_dir: str, language: str, status: str = 'base', freezed_layers: list = None):
-        """
-        define model
+        """set arguments to initialize the model used for summarization
+
+        Args:
+            model_dir (str): [description]
+            language (str): [description]
+            status (str, optional): [description]. Defaults to 'base'.
+            freezed_layers (list, optional): [description]. Defaults to None.
         """
         self.model_path = model_dir
 
@@ -66,11 +71,10 @@ class AbstractiveSummarizer:
             self.device = torch.device("cpu")
         log(f"{self.device} available")
 
-        #TODO: extract as normal method
+        # TODO: extract as normal method
         # freeze layers not to train
         if freezed_layers:
             self.freeze_model_layers(freezed_layers)
-
 
     def initialize_model(self):
         """
@@ -85,19 +89,17 @@ class AbstractiveSummarizer:
         ]
         if self.status == 'base':
             return AutoModelWithLMHead.from_pretrained(self.model_name), \
-                   AutoTokenizer.from_pretrained(self.model_name)
+                AutoTokenizer.from_pretrained(self.model_name)
         else:
             assert all([file in os.listdir(self.model_path) for file in required_files]), \
                 f"Not all required files {'/'.join(required_files)} in {self.model_path}!"
             return AutoModelWithLMHead.from_pretrained(self.model_path), \
-                   AutoTokenizer.from_pretrained(self.model_name)
-
+                AutoTokenizer.from_pretrained(self.model_name)
 
     @staticmethod
     def freeze_params(component):
         for par in component.parameters():
             par.requires_grad = False
-
 
     def freeze_model_layers(self, layers: list):
         """
@@ -123,7 +125,6 @@ class AbstractiveSummarizer:
                 if model_component == 'lm_head':
                     self.freeze_params(self.model.model.lm_head)
                 log(f"freezed {model_component} layers")
-
 
     def predict(self,
                 source: Union[str, dict],
@@ -153,8 +154,10 @@ class AbstractiveSummarizer:
             return_string = False
         elif isinstance(source, str):
             # tokenize text for model
-            model_inputs = [self.tokenizer(source, padding="max_length", truncation="longest_first", return_tensors="pt").to(self.device)['input_ids']]
-            n_tokens = [len([i for i in model_inputs[0].squeeze().numpy() if i != 0])]
+            model_inputs = [self.tokenizer(
+                source, padding="max_length", truncation="longest_first", return_tensors="pt").to(self.device)['input_ids']]
+            n_tokens = [
+                len([i for i in model_inputs[0].squeeze().numpy() if i != 0])]
 
             return_string = True
         else:
@@ -167,23 +170,24 @@ class AbstractiveSummarizer:
         summary_texts = list()
         for tokens, upper_bound, lower_bound in zip(model_inputs, upper_bounds, lower_bounds):
             summary_ids = self.model.generate(
-             tokens.to(self.device),
-             num_beams=5,
-             no_repeat_ngram_size=2,
-             min_length=lower_bound,
-             max_length=upper_bound,
-             early_stopping=True
+                tokens.to(self.device),
+                num_beams=5,
+                no_repeat_ngram_size=2,
+                min_length=lower_bound,
+                max_length=upper_bound,
+                early_stopping=True
             ).to(self.device)
 
             # convert the ids to text
             summary_text = self.tokenizer.decode(
-             summary_ids[0],
-             skip_special_tokens=True
+                summary_ids[0],
+                skip_special_tokens=True
             )
 
             if truncation:
                 # remove incomplete sentences
-                summary_text = truncate_incomplete_sentences(summary_text, self.nlp)
+                summary_text = truncate_incomplete_sentences(
+                    summary_text, self.nlp)
                 # remove leading blanks
                 summary_text = summary_text.strip()
 

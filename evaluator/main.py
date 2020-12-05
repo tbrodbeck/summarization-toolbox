@@ -1,37 +1,60 @@
+"""
+main file to start the evaluation from
+"""
 import sys
 sys.path.append(".")
 import os
+from typing import Optional
 import torch
-from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
-from utilities.gerneral_io_utils import check_make_dir, read_single_txt
-from evaluator.metrics import SemanticSimilarityMetric
-from evaluator.eval import run_evaluation
-from evaluator import eval_util
 from timelogging.timeLog import log
+from evaluator import eval_util
+from evaluator.eval import run_evaluation
+from evaluator.metrics import SemanticSimilarityMetric
+from utilities.gerneral_io_utils import check_make_dir
+from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 
 DATA_DIR = "./dataProvider/datasets"
+METRICS = ["SemanticSimilarity"]
 
-def evaluate(model_dir: str, data_set_name: str, language: str, model_name: str, output_dir="evaluator/output", number_samples=5, reference_model=True, metric="SemanticSimilarity"):
-    """
-    run evaluation
-    :param reference_to_base:
-    :param data_set_name:
-    :param model_name:
-    :param config_path:
-    :return:
+
+def evaluate(
+        model_dir: str,
+        data_set_name: str,
+        language: str,
+        model_name: str,
+        output_dir: Optional[str] = "evaluator/output",
+        number_samples: Optional[int] = 5,
+        reference_model: Optional[bool] = False,
+        metric: Optional[str] = "SemanticSimilarity"):
+    """set infrastructure for the evaluation and run it afterwards
+
+    Args:
+        model_dir (str): directory to load model from
+        data_set_name (str): name of data to evaluate on
+        language (str): choose between 'english' or 'german'
+        model_name (str): name of the model
+        (needed for base model and data folder structure)
+        output_dir (Optional[str], optional): directory to store evaluation file.
+        Defaults to "evaluator/output".
+        number_samples (Optional[int], optional): Number of samples to evluate on.
+        Defaults to 5.
+        reference_model (Optional[bool], optional): model to use as a baseline.
+         Defaults to False.
+        metric (Optional[str], optional): Choose the name of a metric used for evaluation.
+        Defaults to "SemanticSimilarity".
     """
 
     evaluation_parameters = {
         "language": language,
         "output_directory": output_dir,
         "number_samples": number_samples,
-        "reference_model": False,
+        "reference_model": reference_model,
         "metric": metric
     }
     print("\n")
     log("Received parameters for evaluation:")
-    for p in evaluation_parameters:
-        log(f"- {p}: {evaluation_parameters[p]}")
+    for param in evaluation_parameters:
+        log(f"- {param}: {evaluation_parameters[param]}")
 
     ###################################
     # Initialize model
@@ -62,9 +85,9 @@ def evaluate(model_dir: str, data_set_name: str, language: str, model_name: str,
     # Load evaluation data
     ###################################
     data_set_dir = os.path.join(DATA_DIR, data_set_name)
-    assert check_make_dir(data_set_dir), f"Data set '{data_set_name}' not directory '{DATA_DIR}'. " \
-                                         f"Please store data there!"
-
+    assert check_make_dir(data_set_dir), f"Data set '{data_set_name}' \
+        not directory '{DATA_DIR}'. \
+            Please store data there!"
 
     tensor_dir = os.path.join(
         data_set_dir,
@@ -72,10 +95,11 @@ def evaluate(model_dir: str, data_set_name: str, language: str, model_name: str,
     )
     try:
         assert check_make_dir(tensor_dir) and os.listdir(tensor_dir)
-    except:
+    except FileNotFoundError:
         tensor_dir += "_filtered"
         assert check_make_dir(tensor_dir) and os.listdir(tensor_dir), \
-            f"Neither '{tensor_dir.rstrip('_filtered')}' not '{tensor_dir}' does exist or it is empty!"
+            f"Neither '{tensor_dir.rstrip('_filtered')}' \
+                not '{tensor_dir}' does exist or it is empty!"
 
     source_path = os.path.join(tensor_dir, "val_source.pt")
     target_path = os.path.join(tensor_dir, "val_target.pt")
@@ -88,10 +112,15 @@ def evaluate(model_dir: str, data_set_name: str, language: str, model_name: str,
     }
 
     metric = None
+    assert evaluation_parameters["metric"] in METRICS, \
+        f"{evaluation_parameters['metric']} is not a supported metric! \
+            Please use one of those: {str(METRICS)}"
     if evaluation_parameters["metric"] == "SemanticSimilarity":
         metric = SemanticSimilarityMetric(evaluation_parameters["language"])
 
-    run_evaluation(evaluation_dict, model, metric, out_dir, samples, reference_model)
+    run_evaluation(evaluation_dict, model, metric,
+                   out_dir, samples, reference_model)
+
 
 def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples: int = 10):
     """ Considers all checkpoints and final model for evaluation generation
@@ -108,6 +137,8 @@ def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples: int 
     for checkpoint_dir in checkpoint_dirs:
         log(f'Evaluating {checkpoint_dir}...')
         checkpoint_model_path = os.path.join(run_path, checkpoint_dir)
-        evaluate(checkpoint_model_path, dataset_name, model_info.language, model_info.model_name, output_dir=f"{evaluation_basepath}/{checkpoint_dir}", number_samples=nr_samples)
+        evaluate(checkpoint_model_path, dataset_name, model_info.language, model_info.model_name,
+                 output_dir=f"{evaluation_basepath}/{checkpoint_dir}", number_samples=nr_samples)
     log(f'Evaluating final model...')
-    evaluate(run_path, dataset_name, model_info.language, model_info.model_name, output_dir=evaluation_basepath, number_samples=nr_samples)
+    evaluate(run_path, dataset_name, model_info.language, model_info.model_name,
+             output_dir=evaluation_basepath, number_samples=nr_samples)
