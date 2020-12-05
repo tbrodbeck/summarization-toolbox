@@ -1,0 +1,8 @@
+#!python
+import sys
+sys.path.append(".")
+from evaluator.gui import run_gui
+import fire
+
+if __name__ == '__main__':
+  fire.Fire(run_gui)

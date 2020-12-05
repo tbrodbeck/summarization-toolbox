@@ -1,0 +1,15 @@
+#!python
+import sys
+sys.path.append(".")
+from evaluator import analysis
+import fire
+
+def compare_evaluations(eval_path: str):
+  """Compares the generated evaluations of checkpoints in a table `analysis.xslx` where the mean and the standard deviation of the checkpoints is calculated for direct comparison.
+  Args:
+      eval_path (str): Path of the generated evaluation. E.g. `evaluator/evaluations/$MODELNAME/$RUNNR`"""
+  evaluation_comparer = analysis.EvaluationComparer(eval_path)
+  evaluation_comparer.save_dataframe()
+
+if __name__ == '__main__':
+  fire.Fire(compare_evaluations)

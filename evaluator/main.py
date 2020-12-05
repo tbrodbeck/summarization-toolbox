@@ -3,7 +3,7 @@ sys.path.append(".")
 import os
 import torch
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
-from utilities.gerneral_io_utils import check_make_dir, read_single_txt
+from utilities.gerneral_io_utils import check_make_dir
 from evaluator.metrics import SemanticSimilarityMetric
 from evaluator.eval import run_evaluation
 from evaluator import eval_util
@@ -93,6 +93,9 @@ def evaluate(model_dir: str, data_set_name: str, language: str, model_name: str,
 
     run_evaluation(evaluation_dict, model, metric, out_dir, samples, reference_model)
 
+def get_checkpoint_iterations(checkpoint_dir: str) -> str:
+    return checkpoint_dir.split("-")[1]
+
 def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples: int = 10):
     """ Considers all checkpoints and final model for evaluation generation
 
@@ -103,11 +106,12 @@ def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples: int 
     """
     model_info = eval_util.ModelInfoReader(run_path)
     evaluation_basepath = f'evaluator/evaluations/{model_info.run_name}'
-    run_path_walk = os.walk(run_path)
-    _, checkpoint_dirs, _ = next(run_path_walk)
+    checkpoint_dirs = eval_util.get_subdirs(run_path)
     for checkpoint_dir in checkpoint_dirs:
         log(f'Evaluating {checkpoint_dir}...')
         checkpoint_model_path = os.path.join(run_path, checkpoint_dir)
-        evaluate(checkpoint_model_path, dataset_name, model_info.language, model_info.model_name, output_dir=f"{evaluation_basepath}/{checkpoint_dir}", number_samples=nr_samples)
+        iterations = get_checkpoint_iterations(checkpoint_dir)
+        evaluate(checkpoint_model_path, dataset_name, model_info.language, model_info.model_name, output_dir=f"{evaluation_basepath}/{iterations}-iterations", number_samples=nr_samples)
     log(f'Evaluating final model...')
-    evaluate(run_path, dataset_name, model_info.language, model_info.model_name, output_dir=evaluation_basepath, number_samples=nr_samples)
+    evaluate(run_path, dataset_name, model_info.language, model_info.model_name, output_dir=f"{evaluation_basepath}/{model_info.total_iterations}-iterations", number_samples=nr_samples)
+    return evaluation_basepath

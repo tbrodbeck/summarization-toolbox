@@ -83,4 +83,4 @@ def calculate_scores(data: dict, metric: Metric, model: AbstractiveSummarizer, b
         overview_dict["base_model_score"] = base_scores
 
     # produce overview as excel or csv
-    write_table(overview_dict, out_dir, "Overwiew", "excel")
+    write_table(overview_dict, out_dir, "Overview", "excel")
