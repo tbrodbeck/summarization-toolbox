@@ -104,5 +104,5 @@ def fine_tune_model(
         with open(final_path + "/model_info.yml", "w") as info_file:
             yaml.dump(info_dict, info_file)
         # save the fine tuned model
-        check_make_dir(final_path + "/final_model", True)
-        trainer.save_model(final_path + "/final_model")
+        check_make_dir(final_path, True)
+        trainer.save_model(final_path)
