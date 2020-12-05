@@ -3,31 +3,38 @@ this module provides functions
 to clean text and summaries
 """
 
+
 def clean_text(text: str) -> str:
-    """
-    remove non alphas from text
-    :param text:
-    :return:
+    """basic text cleaning of spaces and newlines
+
+    Args:
+        text (str): text to clean
+
+    Returns:
+        str: cleaned text
     """
     character_list = list()
     text = text.replace('  ', ' ')
     text = text.replace('\n', ' ')
     text = text.lower()
-    for t in text:
-        if t == ' ' or t.isalpha() or t.isdigit():
-            character_list.append(t)
+    for character in text:
+        if character == ' ' \
+                or character.isalpha() \
+                or character.isdigit():
+            character_list.append(character)
 
     return ''.join(character_list)
 
 
 def truncate_incomplete_sentences(text: str, nlp) -> str:
-    """
-    make sure no incomplete
-    sentences are at the end
-    of a summary
-    :param nlp:
-    :param text:
-    :return:
+    """remove incomplete sentences at the end of a summary
+
+    Args:
+        text (str): summary text
+        nlp (spacy object): language model
+
+    Returns:
+        str: truncated summary
     """
     excluded_puncts = [",", ";"]
     doc = nlp(text)
@@ -47,12 +54,17 @@ def truncate_incomplete_sentences(text: str, nlp) -> str:
             else:
                 return text[:sentences[-2].end_char]
 
-def limit_data(data_dict: dict, limit: int = -1):
-    """
-    limit the evaluation samples
-    :param data_dict:
-    :param limit:
-    :return:
+
+def limit_data(data_dict: dict, limit: int = -1) -> dict:
+    """apply limitation to data set
+
+    Args:
+        data_dict (dict): set with source and target
+        limit (int, optional): limit of data to process.
+        Defaults to -1.
+
+    Returns:
+        [dict]: dict with limited source and target
     """
     if limit == -1:
         return data_dict

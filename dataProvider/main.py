@@ -2,7 +2,7 @@
 module to read dataset and bring it
 in the right format for training
 """
-from utilities.gerneral_io_utils import read_single_txt, write_txt, \
+from utilities.general_io_utils import read_single_txt, write_txt, \
   assertDirExistent, assertFileInxestent, check_make_dir
 from typing import Optional
 import transformers

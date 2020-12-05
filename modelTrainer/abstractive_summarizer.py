@@ -4,12 +4,13 @@ using the T5 model
 """
 
 import os
+from typing import Union, Optional, Tuple
+
 import spacy
-from transformers import AutoModelWithLMHead, AutoTokenizer, BatchEncoding
+from transformers import AutoModelWithLMHead, AutoTokenizer
 import torch
 from timelogging.timeLog import log
-from typing import Union
-from utilities.gerneral_io_utils import check_make_dir
+from utilities.general_io_utils import check_make_dir
 from utilities.cleaning_utils import truncate_incomplete_sentences
 
 
@@ -18,14 +19,18 @@ class AbstractiveSummarizer:
     class for abstractive text summarization
     """
 
-    def __init__(self, model_dir: str, language: str, status: str = 'base', freezed_layers: list = None):
+    def __init__(
+            self,
+            model_dir: str,
+            language: str,
+            status: Optional[str] = 'base'):
         """set arguments to initialize the model used for summarization
 
         Args:
-            model_dir (str): [description]
-            language (str): [description]
-            status (str, optional): [description]. Defaults to 'base'.
-            freezed_layers (list, optional): [description]. Defaults to None.
+            model_dir (str): direction to load/store model
+            language (str): supported language
+            status (Optional[str], optional): sets if model is
+            already fine-tuned or not. Defaults to 'base'.
         """
         self.model_path = model_dir
 
@@ -33,8 +38,8 @@ class AbstractiveSummarizer:
             f"{language} is not a supported language!"
         self.language = language
         # available models
-        # t5: for english texts
-        # bart: for german texts
+        # t5-base: for english texts
+        # tWikinewsSum/t5-base-multi-de-wiki-news: for german texts
         if language == "english":
             self.model_name = 't5-base'
             self.short_name = 't5'
@@ -50,9 +55,11 @@ class AbstractiveSummarizer:
                 f"Pre-trained '{self.model_name}' is loaded.")
         else:
             assert check_make_dir(self.model_path), \
-                f"Directory '{self.model_path}' doesn't exist! Please follow this folder structure."
+                f"Directory '{self.model_path}' doesn't exist! \
+                    Please follow this folder structure."
             log(f"You chose status '{self.status}'. "
-                f"Fine-tuned '{self.model_name}' from directory '{self.model_path}' is loaded.")
+                f"Fine-tuned '{self.model_name}' from directory \
+                    '{self.model_path}' is loaded.")
 
         # initialize the model and tokenizer
         # based on parameters
@@ -71,16 +78,12 @@ class AbstractiveSummarizer:
             self.device = torch.device("cpu")
         log(f"{self.device} available")
 
-        # TODO: extract as normal method
-        # freeze layers not to train
-        if freezed_layers:
-            self.freeze_model_layers(freezed_layers)
+    def initialize_model(self) -> Tuple[AutoModelWithLMHead, AutoTokenizer]:
+        """check for existing models or initialize with raw model
 
-    def initialize_model(self):
-        """
-        check for existing models
-        or initialize with raw model
-        :return:
+        Returns:
+            Tuple[AutoModelWithLMHead, AutoTokenizer]: model and tokenizer
+            used for training and inference
         """
         required_files = [
             "config.json",
@@ -97,14 +100,20 @@ class AbstractiveSummarizer:
                 AutoTokenizer.from_pretrained(self.model_name)
 
     @staticmethod
-    def freeze_params(component):
+    def freeze_params(component: object):
+        """make model component un-trainable
+
+        Args:
+            component (object): part of transformer model
+        """
         for par in component.parameters():
             par.requires_grad = False
 
     def freeze_model_layers(self, layers: list):
-        """
-        freeze layers
-        :return:
+        """define layers that should not be trained
+
+        Args:
+            layers (list): names of layers contained by transformer
         """
         model_layers = [
             "shared",
@@ -131,17 +140,30 @@ class AbstractiveSummarizer:
                 truncation: bool = True,
                 upper_token_ratio: float = 0.15,
                 lower_token_ratio: float = 0.05) -> Union[list, str]:
-        '''
-        predict a summary based on
-        the given text
-        :param truncation:
-        :param source:
+        """inference from the summary model based on given texts
 
-        :return:
-        '''
+        Args:
+            source (Union[str, dict]): text to summarize
+            truncation (bool, optional): truncate the given text if too long.
+            Defaults to True.
+            upper_token_ratio (float, optional): set the upper bound for the summary.
+            Defaults to 0.15.
+            lower_token_ratio (float, optional): set the lower bound for the summary.
+            Defaults to 0.05.
+
+        Raises:
+            ValueError: wrong input format
+
+        Returns:
+            Union[list, str]: returns batch of summaries
+            or one summary string
+        """
+        # set model to evaluation
+        # and choose gpu if available
         self.model.eval()
         self.model.to(self.device)
 
+        # extract tokens for inference
         if isinstance(source, dict):
             model_inputs = list()
             n_tokens = list()
@@ -155,20 +177,26 @@ class AbstractiveSummarizer:
         elif isinstance(source, str):
             # tokenize text for model
             model_inputs = [self.tokenizer(
-                source, padding="max_length", truncation="longest_first", return_tensors="pt").to(self.device)['input_ids']]
+                source,
+                padding="max_length",
+                truncation="longest_first",
+                return_tensors="pt").to(self.device)['input_ids']]
             n_tokens = [
                 len([i for i in model_inputs[0].squeeze().numpy() if i != 0])]
 
             return_string = True
         else:
-            raise ValueError("Input to 'predict' has to be str or dict!")
+            raise ValueError("Input to 'predict' \
+                has to be str or dict!")
 
+        # set length of outcoming summary
         upper_bounds = [int(n * upper_token_ratio) for n in n_tokens]
         lower_bounds = [int(n * lower_token_ratio) for n in n_tokens]
 
         # produce summary
         summary_texts = list()
-        for tokens, upper_bound, lower_bound in zip(model_inputs, upper_bounds, lower_bounds):
+        for tokens, upper_bound, lower_bound in \
+                zip(model_inputs, upper_bounds, lower_bounds):
             summary_ids = self.model.generate(
                 tokens.to(self.device),
                 num_beams=5,
@@ -195,6 +223,7 @@ class AbstractiveSummarizer:
                 summary_text
             )
 
+        # outcome dependent on input format
         if return_string:
             return summary_texts[0]
         return summary_texts

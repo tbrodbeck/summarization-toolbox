@@ -5,7 +5,7 @@ from typing import Union, Optional
 import torch
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from evaluator.metrics import Metric
-from utilities.gerneral_io_utils import write_table
+from utilities.general_io_utils import write_table
 from utilities.cleaning_utils import limit_data
 
 

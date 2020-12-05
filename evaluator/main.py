@@ -10,7 +10,7 @@ from timelogging.timeLog import log
 from evaluator import eval_util
 from evaluator.eval import run_evaluation
 from evaluator.metrics import SemanticSimilarityMetric
-from utilities.gerneral_io_utils import check_make_dir
+from utilities.general_io_utils import check_make_dir
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 
 DATA_DIR = "./dataProvider/datasets"

@@ -5,11 +5,12 @@ import sys
 import argparse
 
 def parser(*args):
-    """
-    parser function to forward parameters
-    to functions from the shell
-    :param args:
-    :return:
+    """parser for command line arguments
+       based on the first letter of the
+       input names the input structure is
+       defined
+    Returns:
+        [type]: parser with arguments
     """
     ARGUMENTS = sys.argv[1:]
     assert len(ARGUMENTS) != 0, "No command line input!"
