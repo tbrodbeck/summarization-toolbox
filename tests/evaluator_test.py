@@ -1,9 +1,10 @@
 import environs
+from evaluator import analysis
 from evaluator.eval_util import ModelInfoReader
 from timelogging.timeLog import log
-import unittest
+from unittest import TestCase
 
-class Test_Model_Info_Reader(unittest.TestCase):
+class Test_Model_Info_Reader(TestCase):
   def __init__(self, *args, **kwargs):
     super(Test_Model_Info_Reader, self).__init__(*args, **kwargs)
     env = environs.Env()
@@ -21,3 +22,9 @@ class Test_Model_Info_Reader(unittest.TestCase):
     assert self.model_info_reader.language == self.model_info_reader_with_checkpoints.language
     assert self.model_info_reader.model_name == self.model_info_reader_with_checkpoints.model_name
     assert self.model_info_reader.run_name == self.model_info_reader_with_checkpoints.run_name
+
+# class Test_Analysis(TestCase): TODO
+#   def test_plot_analysis(self):
+#     eval_path = 'evaluator/evaluations/t5-de/0'
+#     evaluation_comparer = analysis.EvaluationComparer(eval_path)
+#     evaluation_comparer.plot_analysis()
