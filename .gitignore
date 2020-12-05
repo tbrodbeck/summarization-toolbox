@@ -1,5 +1,6 @@
 dataProvider/datasets
 results/
+evaluator/evaluations/
 .idea
 *.ipynb
 .vscode

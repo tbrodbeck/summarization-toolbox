@@ -219,7 +219,7 @@ def read_config(config_path: str) -> Tuple[dict, dict]:
             config_dict[section].update({entry: config_parser[section][entry]})
     try:
         return config_dict['MODEL'], config_dict['TRAINING']
-    except KeyError:
+    except Exception:
         return config_dict['MODEL'], config_dict['EVALUATION']
 
 
