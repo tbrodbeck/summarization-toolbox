@@ -3,6 +3,7 @@ script to fine tune a huggingface model
 """
 
 import os
+import pickle
 from timelogging.timeLog import log
 from transformers import Trainer, TrainingArguments
 import yaml
@@ -89,7 +90,10 @@ def fine_tune_model(
 
     # perform the training
     try:
-        trainer.train()
+        training_history = trainer.train()
+        # save training history
+        with open(final_path + "/training_history.pickle", "w") as history_file:
+            pickle.dump(training_history, history_file)
 
     finally:
         # save info file
