@@ -1,7 +1,8 @@
 """
 orchestrate the evaluation
 """
-from typing import Union, Optional
+from typing import Union, Optional, List, Tuple
+import pandas as pd
 import torch
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from evaluator.metrics import Metric
@@ -30,8 +31,45 @@ def run_evaluation(
     # limit data to evaluate
     data = limit_data(data, samples)
     # calculate different scores
-    calculate_scores(data, metric, model, base_model, out_dir)
+    #calculate_scores(data, metric, model, base_model, out_dir)
+    evaluator = Evaluator(data, metric, model, base_model)
 
+    evaluator.update_predictions(update_base=bool(base_model))
+
+    source_embeddings = evaluator.get_sentence_embeddings(
+        evaluator.source_text
+    )
+    target_embeddings = evaluator.get_sentence_embeddings(
+        evaluator.target_text
+    )
+    prediction_embeddings = evaluator.get_sentence_embeddings(
+        evaluator.predictions
+    )
+    summary_dict = {
+        "source": evaluator.source_text,
+        "target": evaluator.target_text,
+        "prediction": evaluator.predictions
+    }
+    score_dict = {
+        "gold_score": evaluator.get_similarities(source_embeddings, target_embeddings),
+        "prediction_score": evaluator.get_similarities(source_embeddings, prediction_embeddings),
+        "summary_similarity_score": evaluator.get_similarities(target_embeddings, prediction_embeddings)
+    }
+
+    if base_model:
+        base_prediction_embeddings = evaluator.get_sentence_embeddings(evaluator.base_predictions)
+        summary_dict.update(
+            {"base_prediction": evaluator.base_predictions}
+        )
+        score_dict.update(
+            {
+                "base_prediction_score": evaluator.get_similarities(source_embeddings, base_prediction_embeddings),
+                "base_summary_similarity_score": evaluator.get_similarities(target_embeddings, prediction_embeddings)
+            })
+
+    info_data_frame = evaluator.create_data_frame({**summary_dict,**score_dict})
+
+    evaluator.save_data_frame(info_data_frame, out_dir + "/Overview.xlsx", "excel")
 
 def calculate_scores(
         data: dict,
@@ -109,3 +147,108 @@ def calculate_scores(
 
     # produce overview as excel or csv
     write_table(overview_dict, out_dir, "Overview", "excel")
+
+
+class Evaluator:
+    """general class to perform efficient evaluation
+    """
+    def __init__(
+        self,
+        data: dict,
+        metric: Metric,
+        model: AbstractiveSummarizer,
+        base_model: Optional[AbstractiveSummarizer] = None):
+        """set evaluation framework
+
+        Args:
+            data (dict): evaluation data dictionary
+            model (AbstractiveSummarizer): model to be evaluated
+            metric (Metric): choosen metric for the evaluation
+            base_model (Optional[AbstractiveSummarizer], optional): 
+            Not fine-tuned model as baseline. Defaults to None.
+        """
+        self.device = torch.device('cuda') if torch.cuda.is_available() \
+            else torch.device('cpu')
+
+        self.data = data
+        self.model = model
+        self.metric = metric
+        self.base_model = base_model
+
+        self.source_text, self.target_text = self.decode_tokens(data)
+        self.predictions = None
+        self.base_predictions = None
+
+
+    def decode_tokens(self, data: dict):
+        """turn tokens to text
+
+        Args:
+            data (dict): source and target texts
+
+        Returns:
+            [type]: [description]
+        """
+        source_tokens = self.model.tokenizer.batch_decode(
+            data['source']['input_ids'].to(self.device)
+        )
+        target_tokens = self.model.tokenizer.batch_decode(
+            data['target']['input_ids'].to(self.device)
+        )
+        return source_tokens, target_tokens
+    
+    def get_sentence_embeddings(self, text: Union[str, list]) -> list:
+
+        if isinstance(text, str):
+            text = [text]
+
+        all_embeddings = list()
+        for item in text:
+            all_embeddings.append(
+                self.metric.get_embedding(item)
+            )
+
+        return all_embeddings
+
+    def get_similarities(
+        self, 
+        embedding_1: Union[list, torch.Tensor],
+        embedding_2: Union[list, torch.Tensor]
+        ) -> list:
+
+        if isinstance(embedding_1, torch.Tensor):
+            embedding_1 = [embedding_1]
+            embedding_2 = [embedding_2]
+        
+        all_scores = list()
+        for vector_1, vector_2 in zip(embedding_1, embedding_2):
+            all_scores.append(
+                self.metric.get_similarity(vector_1, vector_2)
+            )
+        return all_scores
+    
+    def update_model(self, new_model: AbstractiveSummarizer):
+        self.model = new_model
+    
+    def update_predictions(self, update_base: bool):
+        self.predictions = self.model.predict(self.data["source"])
+        if update_base:
+            self.base_predictions = self.base_model.predict(self.data["source"])
+    
+    @staticmethod
+    def create_data_frame(info_dict: dict) -> pd.DataFrame:
+        return pd.DataFrame.from_dict(info_dict, orient="columns")
+    
+    @staticmethod
+    def save_data_frame(
+        data_frame: pd.DataFrame,
+        output_path: str,
+        file_format: Optional[str] = "csv"
+    ):
+        if file_format == "csv":
+            output_path += ".csv"
+            data_frame.to_csv(output_path, sep=";")
+        else:
+            with pd.ExcelWriter(output_path + ".xlsx") as writer:
+                data_frame.to_excel(writer, "Overview")
+

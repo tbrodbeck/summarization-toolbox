@@ -69,3 +69,10 @@ class SemanticSimilarityMetric(Metric):
             prediction_embeddings, target_embeddings)
 
         return score.item()
+    
+    def get_embedding(self, text: str) -> torch.Tensor:
+        return torch.tensor(self.transformer.encode(text))
+
+    def get_similarity(self, vector_1: torch.Tensor, vector_2: torch.Tensor) -> float:
+        return self.cosine_similarity(vector_1.unsqueeze(0), vector_2.unsqueeze(0)).item()
+
