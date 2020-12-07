@@ -144,3 +144,12 @@ def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples: int 
     log(f'Evaluating final model...')
     evaluate(run_path, dataset_name, model_info.language, model_info.model_name, output_dir=f"{evaluation_basepath}/{model_info.total_iterations}-iterations", number_samples=nr_samples)
     return evaluation_basepath
+
+
+if __name__ == "__main__":
+    evaluate(
+        "./modelTrainer/results/t5-de/0/checkpoint-5000",
+        "golem",
+        "german",
+        "WikinewsSum/t5-base-multi-de-wiki-news"
+    )
