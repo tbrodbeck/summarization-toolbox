@@ -1,12 +1,13 @@
 """
 orchestrate the evaluation
 """
+import os
 from typing import Union, Optional, List, Tuple
 import pandas as pd
 import torch
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from evaluator.metrics import Metric
-from utilities.general_io_utils import write_table
+from utilities.general_io_utils import write_table, check_make_dir
 from utilities.cleaning_utils import limit_data
 
 
@@ -156,29 +157,24 @@ class Evaluator:
         self,
         data: dict,
         metric: Metric,
-        model: AbstractiveSummarizer,
-        base_model: Optional[AbstractiveSummarizer] = None):
+        tokenizer: object):
         """set evaluation framework
 
         Args:
             data (dict): evaluation data dictionary
-            model (AbstractiveSummarizer): model to be evaluated
+            tokenizer (object): tokenize texts
             metric (Metric): choosen metric for the evaluation
-            base_model (Optional[AbstractiveSummarizer], optional): 
-            Not fine-tuned model as baseline. Defaults to None.
         """
         self.device = torch.device('cuda') if torch.cuda.is_available() \
             else torch.device('cpu')
 
         self.data = data
-        self.model = model
+        self.tokenizer = tokenizer
         self.metric = metric
-        self.base_model = base_model
 
         self.source_text, self.target_text = self.decode_tokens(data)
-        self.predictions = None
-        self.base_predictions = None
-
+        self.source_embeddings = self.get_sentence_embeddings(self.source_text)
+        self.target_embeddings = self.get_sentence_embeddings(self.target_text)
 
     def decode_tokens(self, data: dict):
         """turn tokens to text
@@ -189,14 +185,17 @@ class Evaluator:
         Returns:
             [type]: [description]
         """
-        source_tokens = self.model.tokenizer.batch_decode(
+        source_tokens = self.tokenizer.batch_decode(
             data['source']['input_ids'].to(self.device)
         )
-        target_tokens = self.model.tokenizer.batch_decode(
+        target_tokens = self.tokenizer.batch_decode(
             data['target']['input_ids'].to(self.device)
         )
         return source_tokens, target_tokens
-    
+
+    def get_model_predictions(self, model: AbstractiveSummarizer):
+        return model.predict(self.data["source"])
+        
     def get_sentence_embeddings(self, text: Union[str, list]) -> list:
 
         if isinstance(text, str):
@@ -227,13 +226,43 @@ class Evaluator:
             )
         return all_scores
     
-    def update_model(self, new_model: AbstractiveSummarizer):
-        self.model = new_model
+    def get_score_dict(
+        self,
+        model: AbstractiveSummarizer,
+        base_model: Optional[AbstractiveSummarizer] = None) -> dict:
+        predictions = self.get_model_predictions(model)
+        score_dict = self.get_scores(predictions)
     
-    def update_predictions(self, update_base: bool):
-        self.predictions = self.model.predict(self.data["source"])
-        if update_base:
-            self.base_predictions = self.base_model.predict(self.data["source"])
+        if base_model:
+            base_predictions = self.get_model_predictions(base_model)
+            base_score_dict = self.get_scores(
+                base_predictions, is_base_model=True
+            )
+            return {**score_dict, **base_score_dict}
+        return score_dict
+        
+    
+    def get_scores(self, predictions: list, is_base_model: bool = False) -> dict:
+        score_dict = dict()
+        prediction_embeddings = self.get_sentence_embeddings(
+            predictions
+        )
+        prefix = "base_"
+        if not is_base_model:
+            prefix = ""
+
+            score_dict[f"{prefix}gold_score"] = self.get_similarities(
+                self.source_embeddings,
+                self.target_embeddings
+            )
+
+        score_dict[f"{prefix}prediction_score"] = self.get_similarities(
+            self.source_embeddings, prediction_embeddings
+        )
+        score_dict[f"{prefix}summary_similarity_score"] = self.get_similarities(
+            prediction_embeddings, self.target_embeddings
+        )
+        return score_dict
     
     @staticmethod
     def create_data_frame(info_dict: dict) -> pd.DataFrame:
@@ -245,6 +274,9 @@ class Evaluator:
         output_path: str,
         file_format: Optional[str] = "csv"
     ):
+        # check if output directory exists 
+        out_dir = os.path.dirname(output_path)
+        check_make_dir(out_dir, create_dir=True)
         if file_format == "csv":
             output_path += ".csv"
             data_frame.to_csv(output_path, sep=";")
