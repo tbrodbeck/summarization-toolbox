@@ -11,13 +11,13 @@ class TestDataProvider(unittest.TestCase):
     #   for tokenizerName in o.TOKENIZER_NAMES:
     #     o.provideData(datasetName, tokenizerName)
 
-    self.assertRaises(ValueError, o.provideData, o.TOKENIZER_NAMES[0], 'dataset', o.MODEL_NAMES[0], 1)
+    self.assertRaises(ValueError, o.provide_data, o.TOKENIZER_NAMES[0], 'dataset', o.MODEL_NAMES[0], 1)
 
     # no impossible input
-    self.assertRaises(ValueError, o.provideData, 'unknown', 'dataset', o.MODEL_NAMES[0])
-    self.assertRaises(ValueError, o.provideData, o.TOKENIZER_NAMES[0], 'unknown', o.MODEL_NAMES[0])
-    self.assertRaises(ValueError, o.provideData, o.TOKENIZER_NAMES[0], 'dataset', 'unknown')
-    self.assertRaises(ValueError, o.provideData, o.TOKENIZER_NAMES[0], 'dataset', -1)
+    self.assertRaises(ValueError, o.provide_data, 'unknown', 'dataset', o.MODEL_NAMES[0])
+    self.assertRaises(ValueError, o.provide_data, o.TOKENIZER_NAMES[0], 'unknown', o.MODEL_NAMES[0])
+    self.assertRaises(ValueError, o.provide_data, o.TOKENIZER_NAMES[0], 'dataset', 'unknown')
+    self.assertRaises(ValueError, o.provide_data, o.TOKENIZER_NAMES[0], 'dataset', -1)
 
     # dataset = 'golem'
     # # dataPath = f'dataProvider/datasets/{dataset}/'
