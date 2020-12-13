@@ -9,21 +9,24 @@ import torch
 from timelogging.timeLog import log
 from evaluator import eval_util
 from evaluator.eval import Evaluator
-from evaluator.metrics import Metric, SemanticSimilarityMetric
+from evaluator import metrics
 from utilities.general_io_utils import check_make_dir
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from utilities.cleaning_utils import limit_data
 
 DATA_DIR = "./dataProvider/datasets"
-METRICS = ["SemanticSimilarity"]
+METRICS = ["SemanticSimilarity", "Rouge"]
 
-def get_metric(metric_type: str, language: str) -> Metric:
+def get_metric(metric_type: str, language: str) -> metrics.Metric:
     metric = None
     assert metric_type in METRICS, \
         f"{metric_type} is not a supported metric! \
             Please use one of those: {str(METRICS)}"
     if metric_type == "SemanticSimilarity":
-        metric = SemanticSimilarityMetric(language)
+        metric = metrics.SemanticSimilarityMetric(language)
+    if metric_type == "Rouge":
+        metric = metrics.Rouge()
+
     return metric
 
 def get_checkpoint_iterations(checkpoint_dir: str) -> str:
@@ -38,11 +41,12 @@ def initialize_model(model_dir: str, language: str) -> AbstractiveSummarizer:
 
 def initialize_reference_model(language: str) -> AbstractiveSummarizer:
     return AbstractiveSummarizer(
+        None,
         language,
         "base"
     )
 
-def preprocess_data(dataset_name: str, nr_samples: int) -> Dict:
+def preprocess_data(dataset_name: str, nr_samples: int, model_name: str) -> Dict:
     data_set_dir = os.path.join(DATA_DIR, dataset_name)
     assert check_make_dir(data_set_dir), f"Data set '{dataset_name}' \
         not directory '{DATA_DIR}'. \
@@ -70,13 +74,13 @@ def preprocess_data(dataset_name: str, nr_samples: int) -> Dict:
         "target": torch.load(open(target_path, "rb"))
     }
     return limit_data(data_dict, nr_samples)
-        
-def prepare_evaluator(tokenizer: object, metric_name: str, language: str, dataset_name: str, nr_samples: int, model_path: str) -> Evaluator:
+
+def prepare_evaluator(tokenizer: object, metric_name: str, language: str, dataset_name: str, nr_samples: int, model_path: str, model_name: str) -> Evaluator:
     metric = get_metric(metric_name, language)
-    data_dict = preprocess_data(dataset_name, nr_samples)
+    data_dict = preprocess_data(dataset_name, nr_samples, model_name)
     return Evaluator(data_dict, metric, tokenizer)
 
-def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples: int = 10):
+def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples=10, metric_type='Rouge'):
     """ Considers all checkpoints and final model for evaluation generation
 
     Args:
@@ -88,8 +92,8 @@ def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples: int 
     evaluation_basepath = f'evaluator/evaluations/{model_info.run_name}'
     checkpoint_dirs = eval_util.get_subdirs(run_path)
     model = initialize_model(run_path, model_info.language)
-    reference_model = initialize_reference_model(model_info.language) #TODO in evaluator packen
-    evaluator = prepare_evaluator(model.tokenizer, 'SemanticSimilarity', model_info.language, dataset_name, nr_samples, run_path)
+    reference_model = initialize_reference_model(model_info.language)  # TODO in evaluator packen
+    evaluator = prepare_evaluator(model.tokenizer, metric_type, model_info.language, dataset_name, nr_samples, run_path, model_info.model_name)
     # for checkpoint_dir in checkpoint_dirs:
     #     checkpoint_model = initialize_model(checkpoint_dir, model_info.language)
     #     log(f'Evaluating {checkpoint_dir}...')
