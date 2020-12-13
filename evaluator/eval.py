@@ -173,8 +173,7 @@ class Evaluator:
         self.metric = metric
 
         self.source_text, self.target_text = self.decode_tokens(data)
-        self.source_embeddings = self.get_sentence_embeddings(self.source_text)
-        self.target_embeddings = self.get_sentence_embeddings(self.target_text)
+
 
     def decode_tokens(self, data: dict):
         """turn tokens to text
@@ -195,7 +194,7 @@ class Evaluator:
 
     def get_model_predictions(self, model: AbstractiveSummarizer):
         return model.predict(self.data["source"])
-        
+
     def get_sentence_embeddings(self, text: Union[str, list]) -> list:
 
         if isinstance(text, str):
@@ -231,15 +230,25 @@ class Evaluator:
         model: AbstractiveSummarizer,
         base_model: Optional[AbstractiveSummarizer] = None) -> dict:
         predictions = self.get_model_predictions(model)
+        if base_model:
+            base_predictions = self.get_model_predictions(base_model)
+
+        text_dict = {
+            "source_text": self.source_text,
+            "target_text": self.target_text,
+            "prediction": predictions
+        }
+        if base_model:
+            text_dict["base_prediction"] = base_predictions
+
         score_dict = self.get_scores(predictions)
     
         if base_model:
-            base_predictions = self.get_model_predictions(base_model)
             base_score_dict = self.get_scores(
                 base_predictions, is_base_model=True
             )
-            return {**score_dict, **base_score_dict}
-        return score_dict
+            return {**text_dict, **{**score_dict, **base_score_dict}}
+        return {**text_dict, **score_dict}
         
     
     def get_scores(self, predictions: list, is_base_model: bool = False) -> dict:
@@ -263,7 +272,8 @@ class Evaluator:
             prediction_embeddings, self.target_embeddings
         )
         return score_dict
-    
+
+
     @staticmethod
     def create_data_frame(info_dict: dict) -> pd.DataFrame:
         return pd.DataFrame.from_dict(info_dict, orient="columns")
@@ -281,6 +291,6 @@ class Evaluator:
             output_path += ".csv"
             data_frame.to_csv(output_path, sep=";")
         else:
-            with pd.ExcelWriter(output_path + ".xlsx") as writer:
+            with pd.ExcelWriter(output_path) as writer:
                 data_frame.to_excel(writer, "Overview")
 
