@@ -48,6 +48,9 @@ class SemanticSimilarityMetric(Metric):
         else:
             print("Intitialized semantic similarity metric for German texts.")
 
+
+
+
     def get_score(self, prediction: str, target: str) -> float:
         """calculates score for the semantic similarity metric
            higher score -> higher semanctic similarity
