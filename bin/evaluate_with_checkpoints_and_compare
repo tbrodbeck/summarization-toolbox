@@ -4,13 +4,13 @@ sys.path.append(".")
 from evaluator import analysis, main
 import fire
 
-def evaluate_with_checkpoints_and_compare(run_path: str, dataset_name: str, nr_samples: int = 10):
+def evaluate_with_checkpoints_and_compare(run_path: str, dataset_name: str, nr_samples=10, metric_type='Rouge'):
   """Evaluates a training run with all its checkpoints. The evaluation is saved in `evaluator/evaluations/$MODELNAME/$RUNNR`. After evaluation the checkpoints will be compared and a table `analysis.xslx` will be generated where the mean and the standard deviation of the checkpoints is calculated for direct comparison.
   Args:
       run_path (str): Path of the training run. E.g. `modelTrainer/results/$MODELNAME/$RUNNR`
       dataset_name (str): E.g. `golem`
       nr_samples (int, optional): Amount of samples of the validation set that are used by the evaluation. Defaults to 10."""
-  eval_path = main.evaluate_with_checkpoints(run_path, dataset_name, nr_samples)
+  eval_path = main.evaluate_with_checkpoints(run_path, dataset_name, nr_samples, metric_type)
   evaluation_comparer = analysis.EvaluationComparer(eval_path)
   evaluation_comparer.save_dataframe()
   # evaluation_comparer.plot_analysis() TODO

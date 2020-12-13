@@ -277,7 +277,7 @@ def write_table(
         file_format (str, optional): switch for excel or csv.
         Defaults to "csv".
     """
-    
+
     assert file_format in [
         "csv", "excel"], "'file_format' has to be either 'excel' or 'csv'!"
     output_path = os.path.join(output_dir, file_name)
@@ -287,8 +287,8 @@ def write_table(
         output_path += ".csv"
         df.to_csv(output_path, sep=";")
     else:
-        with pd.ExcelWriter(output_path + ".xlsx") as writer:
-            df.to_excel(writer, "Overview")
+        with pd.ExcelWriter(output_path) as writer:
+            df.to_excel(writer)
 
 
 def write_pickle(obj: Union[object, list], file_name: str, file_path: str):

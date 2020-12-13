@@ -1,0 +1,3 @@
+[submodule "evaluator/PyRouge"]
+	path = evaluator/PyRouge
+	url = https://github.com/pcyin/PyRouge
