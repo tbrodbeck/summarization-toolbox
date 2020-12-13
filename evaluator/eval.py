@@ -172,8 +172,10 @@ class Evaluator:
         self.tokenizer = tokenizer
         self.metric = metric
 
-        self.source_text, self.target_text = self.decode_tokens(data)
 
+        self.source_text, self.target_text = self.decode_tokens(data)
+        self.source_embeddings = self.get_sentence_embeddings(self.source_text)
+        self.target_embeddings = self.get_sentence_embeddings(self.target_text)
 
     def decode_tokens(self, data: dict):
         """turn tokens to text
