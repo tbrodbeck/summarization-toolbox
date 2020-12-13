@@ -46,7 +46,7 @@ def initialize_reference_model(language: str) -> AbstractiveSummarizer:
         "base"
     )
 
-def preprocess_data(dataset_name: str, nr_samples: int, model_name: str) -> Dict:
+def preprocess_data(dataset_name: str, nr_samples: int, tokenizer_name) -> Dict:
     data_set_dir = os.path.join(DATA_DIR, dataset_name)
     assert check_make_dir(data_set_dir), f"Data set '{dataset_name}' \
         not directory '{DATA_DIR}'. \
@@ -54,20 +54,17 @@ def preprocess_data(dataset_name: str, nr_samples: int, model_name: str) -> Dict
 
     tensor_dir = os.path.join(
         data_set_dir,
-        model_name
+        tokenizer_name
     )
     try:
         assert check_make_dir(tensor_dir) and os.listdir(tensor_dir)
     except Exception:
         tensor_dir += "_filtered"
-        assert check_make_dir(tensor_dir) and os.listdir(tensor_dir), \
-            f"Neither '{tensor_dir.rstrip('_filtered')}' \
-                not '{tensor_dir}' does exist or it is empty!"
+        assert (check_make_dir(tensor_dir) and os.listdir(tensor_dir)), f"Neither '{tensor_dir.rstrip('_filtered')} not '{tensor_dir}' does exist or it is empty!"
 
     source_path = os.path.join(tensor_dir, "val_source.pt")
     target_path = os.path.join(tensor_dir, "val_target.pt")
-    assert os.path.isfile(source_path) and os.path.isfile(target_path), \
-        f"Data pair '{source_path}' and '{target_path}' does not exist!"
+    assert os.path.isfile(source_path) and os.path.isfile(target_path), f"Data pair '{source_path}' and '{target_path}' does not exist!"
 
     data_dict = {
         "source": torch.load(open(source_path, "rb")),
@@ -108,7 +105,7 @@ def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples=10, m
 
     evaluator.save_data_frame(info_data_frame, evaluation_basepath + "/Overview.xlsx", file_format="excel")
 
-    #evaluate(run_path, dataset_name, model_info.language, model_info.model_name, output_dir=f"{evaluation_basepath}/{model_info.total_iterations}-iterations", number_samples=nr_samples)
+    # evaluate(run_path, dataset_name, model_info.language, model_info.model_name, output_dir=f"{evaluation_basepath}/{model_info.total_iterations}-iterations", number_samples=nr_samples)
     return evaluation_basepath
 
 
