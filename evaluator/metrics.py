@@ -1,13 +1,14 @@
 """
 module for all supported metrics
 """
+import sys
+sys.path.append(".")
+from evaluator.PyRouge.PyRouge import pyrouge
 import sentence_transformers
 import torch
 
-
 class Metric:
     """Interface for Metrics"""
-
     def get_score(self, prediction: str, target: str) -> float:
         """dummy get score
 
@@ -20,6 +21,13 @@ class Metric:
         """
         return 0.0
 
+class Rouge(Metric):
+    def __init__(self):
+        self.r = pyrouge.Rouge()
+
+    def get_score(self, prediction: str, target: str) -> float:
+        [_, _, f_score] = self.r.rouge_l([prediction], [target])
+        return f_score
 
 class SemanticSimilarityMetric(Metric):
     """
@@ -72,10 +80,9 @@ class SemanticSimilarityMetric(Metric):
             prediction_embeddings, target_embeddings)
 
         return score.item()
-    
+
     def get_embedding(self, text: str) -> torch.Tensor:
         return torch.tensor(self.transformer.encode(text))
 
     def get_similarity(self, vector_1: torch.Tensor, vector_2: torch.Tensor) -> float:
         return self.cosine_similarity(vector_1.unsqueeze(0), vector_2.unsqueeze(0)).item()
-
