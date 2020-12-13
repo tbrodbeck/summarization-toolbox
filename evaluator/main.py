@@ -37,12 +37,12 @@ def initialize_model(model_dir: str, language: str) -> AbstractiveSummarizer:
     )
 
 def initialize_reference_model(language: str) -> AbstractiveSummarizer:
-    return AbstractiveSummarizer(
+    return AbstractiveSummarizer(None,
         language,
         "base"
     )
 
-def preprocess_data(dataset_name: str, nr_samples: int) -> Dict:
+def preprocess_data(dataset_name: str, tokenizer_name, nr_samples: int) -> Dict:
     data_set_dir = os.path.join(DATA_DIR, dataset_name)
     assert check_make_dir(data_set_dir), f"Data set '{dataset_name}' \
         not directory '{DATA_DIR}'. \
@@ -50,7 +50,7 @@ def preprocess_data(dataset_name: str, nr_samples: int) -> Dict:
 
     tensor_dir = os.path.join(
         data_set_dir,
-        model_name
+        tokenizer_name
     )
     try:
         assert check_make_dir(tensor_dir) and os.listdir(tensor_dir)
@@ -71,12 +71,12 @@ def preprocess_data(dataset_name: str, nr_samples: int) -> Dict:
     }
     return limit_data(data_dict, nr_samples)
         
-def prepare_evaluator(tokenizer: object, metric_name: str, language: str, dataset_name: str, nr_samples: int, model_path: str) -> Evaluator:
+def prepare_evaluator(tokenizer: object, metric_name: str, language: str, model_name: str, dataset_name: str, nr_samples: int, model_path: str) -> Evaluator:
     metric = get_metric(metric_name, language)
-    data_dict = preprocess_data(dataset_name, nr_samples)
+    data_dict = preprocess_data(dataset_name, model_name, nr_samples)
     return Evaluator(data_dict, metric, tokenizer)
 
-def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples: int = 10):
+def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples: int = 2):
     """ Considers all checkpoints and final model for evaluation generation
 
     Args:
@@ -89,7 +89,7 @@ def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples: int 
     checkpoint_dirs = eval_util.get_subdirs(run_path)
     model = initialize_model(run_path, model_info.language)
     reference_model = initialize_reference_model(model_info.language) #TODO in evaluator packen
-    evaluator = prepare_evaluator(model.tokenizer, 'SemanticSimilarity', model_info.language, dataset_name, nr_samples, run_path)
+    evaluator = prepare_evaluator(model.tokenizer, 'SemanticSimilarity', model_info.language, model_info.model_name, dataset_name, nr_samples, run_path)
     # for checkpoint_dir in checkpoint_dirs:
     #     checkpoint_model = initialize_model(checkpoint_dir, model_info.language)
     #     log(f'Evaluating {checkpoint_dir}...')
