@@ -147,3 +147,4 @@ dmypy.json
 
 # do not upload model files
 evaluator/output/
+evaluator/PyRouge
