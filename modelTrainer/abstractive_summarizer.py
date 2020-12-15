@@ -9,7 +9,6 @@ from typing import Union, Optional, Tuple
 import spacy
 from transformers import AutoModelWithLMHead, AutoTokenizer
 import torch
-from timelogging.timeLog import log
 from utilities.general_io_utils import check_make_dir
 from utilities.cleaning_utils import truncate_incomplete_sentences
 
@@ -50,16 +49,10 @@ class AbstractiveSummarizer:
 
         assert status in ['base', 'fine-tuned']
         self.status = status
-        if self.status == 'base':
-            log(f"You chose status '{self.status}'. "
-                f"Pre-trained '{self.model_name}' is loaded.")
-        else:
+        if self.status != 'base':
             assert check_make_dir(self.model_path), \
                 f"Directory '{self.model_path}' doesn't exist! \
                     Please follow this folder structure."
-            log(f"You chose status '{self.status}'. "
-                f"Fine-tuned '{self.model_name}' from directory \
-                    '{self.model_path}' is loaded.")
 
         # initialize the model and tokenizer
         # based on parameters
@@ -76,7 +69,6 @@ class AbstractiveSummarizer:
             self.device = torch.device("cuda")
         else:
             self.device = torch.device("cpu")
-        log(f"{self.device} available")
 
     def initialize_model(self) -> Tuple[AutoModelWithLMHead, AutoTokenizer]:
         """check for existing models or initialize with raw model
@@ -133,7 +125,6 @@ class AbstractiveSummarizer:
                     self.freeze_params(self.model.decoder.embed_tokens)
                 if model_component == 'lm_head':
                     self.freeze_params(self.model.model.lm_head)
-                log(f"freezed {model_component} layers")
 
     def predict(self,
                 source: Union[str, dict],

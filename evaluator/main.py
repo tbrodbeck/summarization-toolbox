@@ -4,7 +4,7 @@ main file to start the evaluation from
 import sys
 sys.path.append(".")
 import os
-from typing import Dict, Optional
+from typing import Dict
 import torch
 from timelogging.timeLog import log
 from evaluator import eval_util
@@ -99,7 +99,7 @@ def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples=10, m
     #     evaluate(checkpoint_model_path, dataset_name, model_info.language, model_info.model_name, output_dir=f"{evaluation_basepath}/{iterations}-iterations", number_samples=nr_samples)
     log(f'Evaluating final model...')
 
-    evalutation_dict = evaluator.get_score_dict(model, reference_model)
+    evalutation_dict = evaluator.get_score_dict(model)
 
     info_data_frame = evaluator.create_data_frame(evalutation_dict)
 

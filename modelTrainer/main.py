@@ -10,7 +10,6 @@ from typing import Optional
 import sys
 sys.path.append(".")
 import torch
-from timelogging.timeLog import log
 import fire
 
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
@@ -127,8 +126,6 @@ def initialize_trainer(
                         tensor_dir,
                         f"{split_name}_{text_name}.pt"
                     )
-
-                    log(f"load data from: {file_path}")
                     data_dict[split_name][text_name] = torch.load(
                         open(file_path, "rb")
                     )
@@ -159,14 +156,9 @@ def initialize_trainer(
         if MODEL[parameter_name]:
             model_parameters[parameter_name] = MODEL[parameter_name]
 
-    log("Received parameters for model:")
-    for param in model_parameters:
-        log(f"- {param}: {model_parameters[param]}")
 
     # check if output directory exists
-    if not check_make_dir(model_parameters["output_directory"], create_dir=True):
-        log(
-            f"Created output directory'{model_parameters['output_directory']}'")
+    check_make_dir(model_parameters["output_directory"], create_dir=True)
 
     ###################################
     # Initialize Model
@@ -188,10 +180,6 @@ def initialize_trainer(
     for parameter_name in TRAINING_CONFIG:
         if TRAINING[parameter_name]:
             training_parameters[parameter_name] = TRAINING[parameter_name]
-
-    log("Received parameters for training:")
-    for param in training_parameters:
-        log(f"- {param}: {training_parameters[param]}")
 
     fine_tune_model(
         model,

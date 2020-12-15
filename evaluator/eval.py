@@ -2,7 +2,7 @@
 orchestrate the evaluation
 """
 import os
-from typing import Union, Optional, List, Tuple
+from typing import Union, Optional
 import pandas as pd
 import torch
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
@@ -172,10 +172,7 @@ class Evaluator:
         self.tokenizer = tokenizer
         self.metric = metric
 
-
         self.source_text, self.target_text = self.decode_tokens(data)
-        self.source_embeddings = self.get_sentence_embeddings(self.source_text)
-        self.target_embeddings = self.get_sentence_embeddings(self.target_text)
 
     def decode_tokens(self, data: dict):
         """turn tokens to text
@@ -197,81 +194,48 @@ class Evaluator:
     def get_model_predictions(self, model: AbstractiveSummarizer):
         return model.predict(self.data["source"])
 
-    def get_sentence_embeddings(self, text: Union[str, list]) -> list:
-
-        if isinstance(text, str):
-            text = [text]
-
-        all_embeddings = list()
-        for item in text:
-            all_embeddings.append(
-                self.metric.get_embedding(item)
-            )
-
-        return all_embeddings
-
-    def get_similarities(
-        self, 
-        embedding_1: Union[list, torch.Tensor],
-        embedding_2: Union[list, torch.Tensor]
+    def get_metric(
+        self,
+        text_list_1: list,
+        text_list_2: list
         ) -> list:
-
-        if isinstance(embedding_1, torch.Tensor):
-            embedding_1 = [embedding_1]
-            embedding_2 = [embedding_2]
         
         all_scores = list()
-        for vector_1, vector_2 in zip(embedding_1, embedding_2):
+        for item_1, item_2 in zip(text_list_1, text_list_2):
             all_scores.append(
-                self.metric.get_similarity(vector_1, vector_2)
+                self.metric.get_score(item_1, item_2)
             )
         return all_scores
     
     def get_score_dict(
         self,
-        model: AbstractiveSummarizer,
-        base_model: Optional[AbstractiveSummarizer] = None) -> dict:
+        model: AbstractiveSummarizer) -> dict:
         predictions = self.get_model_predictions(model)
-        if base_model:
-            base_predictions = self.get_model_predictions(base_model)
 
         text_dict = {
             "source_text": self.source_text,
             "target_text": self.target_text,
             "prediction": predictions
         }
-        if base_model:
-            text_dict["base_prediction"] = base_predictions
 
         score_dict = self.get_scores(predictions)
-    
-        if base_model:
-            base_score_dict = self.get_scores(
-                base_predictions, is_base_model=True
-            )
-            return {**text_dict, **{**score_dict, **base_score_dict}}
+
         return {**text_dict, **score_dict}
         
     
-    def get_scores(self, predictions: list, is_base_model: bool = False) -> dict:
+    def get_scores(self, predictions: list) -> dict:
         score_dict = dict()
-        prediction_embeddings = self.get_sentence_embeddings(
-            predictions
-        )
-        prefix = "base_"
-        if not is_base_model:
-            prefix = ""
 
-            score_dict[f"{prefix}gold_score"] = self.get_similarities(
-                self.source_embeddings,
-                self.target_embeddings
-            )
-
-        score_dict[f"{prefix}prediction_score"] = self.get_similarities(
-            self.source_embeddings, prediction_embeddings
+        score_dict["gold_score"] = self.get_metric(
+            self.source_text,
+            self.target_text
         )
-        score_dict[f"{prefix}summary_similarity_score"] = self.get_similarities(
-            prediction_embeddings, self.target_embeddings
+
+        score_dict["prediction_score"] = self.get_metric(
+            self.source_text, predictions
+        )
+        score_dict["summary_similarity_score"] = self.get_metric(
+            self.target_text, predictions
         )
         return score_dict
 
