@@ -7,7 +7,7 @@ import pandas as pd
 import torch
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from evaluator.metrics import Metric
-from utilities.general_io_utils import write_table, check_make_dir
+from utilities.io_utils import write_table, check_make_dir
 from utilities.cleaning_utils import limit_data
 
 
@@ -68,7 +68,7 @@ def run_evaluation(
                 "base_summary_similarity_score": evaluator.get_similarities(target_embeddings, prediction_embeddings)
             })
 
-    info_data_frame = evaluator.create_data_frame({**summary_dict,**score_dict})
+    info_data_frame = evaluator.create_data_frame({**summary_dict, **score_dict})
 
     evaluator.save_data_frame(info_data_frame, out_dir + "/Overview.xlsx", "excel")
 
@@ -211,7 +211,7 @@ class Evaluator:
         return all_embeddings
 
     def get_similarities(
-        self, 
+        self,
         embedding_1: Union[list, torch.Tensor],
         embedding_2: Union[list, torch.Tensor]
         ) -> list:
@@ -219,14 +219,14 @@ class Evaluator:
         if isinstance(embedding_1, torch.Tensor):
             embedding_1 = [embedding_1]
             embedding_2 = [embedding_2]
-        
+
         all_scores = list()
         for vector_1, vector_2 in zip(embedding_1, embedding_2):
             all_scores.append(
                 self.metric.get_similarity(vector_1, vector_2)
             )
         return all_scores
-    
+
     def get_score_dict(
         self,
         model: AbstractiveSummarizer,
@@ -244,15 +244,15 @@ class Evaluator:
             text_dict["base_prediction"] = base_predictions
 
         score_dict = self.get_scores(predictions)
-    
+
         if base_model:
             base_score_dict = self.get_scores(
                 base_predictions, is_base_model=True
             )
             return {**text_dict, **{**score_dict, **base_score_dict}}
         return {**text_dict, **score_dict}
-        
-    
+
+
     def get_scores(self, predictions: list, is_base_model: bool = False) -> dict:
         score_dict = dict()
         prediction_embeddings = self.get_sentence_embeddings(
@@ -279,14 +279,14 @@ class Evaluator:
     @staticmethod
     def create_data_frame(info_dict: dict) -> pd.DataFrame:
         return pd.DataFrame.from_dict(info_dict, orient="columns")
-    
+
     @staticmethod
     def save_data_frame(
         data_frame: pd.DataFrame,
         output_path: str,
         file_format: Optional[str] = "csv"
     ):
-        # check if output directory exists 
+        # check if output directory exists
         out_dir = os.path.dirname(output_path)
         check_make_dir(out_dir, create_dir=True)
         if file_format == "csv":
@@ -295,4 +295,3 @@ class Evaluator:
         else:
             with pd.ExcelWriter(output_path) as writer:
                 data_frame.to_excel(writer, "Overview")
-

@@ -10,7 +10,7 @@ import transformers
 import numpy as np
 import fire
 from timelogging.timeLog import log
-from utilities.general_io_utils import read_single_txt, write_txt, \
+from utilities.io_utils import read_single_txt, write_txt, \
   assertDirExistent, assertFileInxestent, check_make_dir
 
 MODEL_NAMES = ['t5-base']
