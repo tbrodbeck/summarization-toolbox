@@ -9,7 +9,7 @@ from transformers import Trainer, TrainingArguments
 import yaml
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from modelTrainer.data_set_creation import create_dataset
-from utilities.general_io_utils import check_make_dir
+from utilities.io_utils import check_make_dir
 from utilities.cleaning_utils import limit_data
 
 
@@ -101,7 +101,7 @@ def fine_tune_model(
             "language": summary_model.language,
             "model_name": summary_model.model_name,
             "run_name": summary_model.short_name + "/" + str(model_version),
-            "total_iterations": int(len(train_data)/int(parameters["train_batch_size"]))
+            "total_iterations": int(len(train_data) / int(parameters["train_batch_size"]))
                                  * int(parameters["epochs"])
         }
 

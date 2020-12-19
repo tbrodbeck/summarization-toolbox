@@ -10,7 +10,7 @@ import spacy
 from transformers import AutoModelWithLMHead, AutoTokenizer
 import torch
 from timelogging.timeLog import log
-from utilities.general_io_utils import check_make_dir
+from utilities.io_utils import check_make_dir
 from utilities.cleaning_utils import truncate_incomplete_sentences
 
 

@@ -15,7 +15,7 @@ import fire
 
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from modelTrainer.fine_tuning import fine_tune_model
-from utilities.general_io_utils import read_config, check_make_dir
+from utilities.io_utils import read_config, check_make_dir
 
 
 CLI = [
