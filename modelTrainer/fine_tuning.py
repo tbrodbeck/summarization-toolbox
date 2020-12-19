@@ -4,7 +4,6 @@ script to fine tune a huggingface model
 
 import os
 import pickle
-from timelogging.timeLog import log
 from transformers import Trainer, TrainingArguments
 import yaml
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
@@ -58,8 +57,7 @@ def fine_tune_model(
 
     # prepare path for logs
     logs_path = os.path.join('/'.join(final_path.split('/')[:-2]), 'logs')
-    if not check_make_dir(logs_path, create_dir=True):
-        log("Created", logs_path)
+    check_make_dir(logs_path, create_dir=True)
 
     # initialize the training parameters
     training_args = TrainingArguments(
