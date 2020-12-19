@@ -1,0 +1,17 @@
+#!python
+import sys
+sys.path.append(".")
+from evaluator import similarity_embeddings_creator
+import fire
+
+def create_similarity_embeddings(datasetPath: str, dataset_split: str, savePath: str, language='german'):
+  """creates and saves similarity embeddings of a certain dataset
+  Args:
+      datasetPath (str): path to the dataset directory
+      dataset_split (str): `train`, `val`, or `test` split
+      savePath (str): path to save the embeddings
+      language (str, optional): language that is used by the encoder. Defaults to 'german'."""
+  semantic_similarity_creator = similarity_embeddings_creator.SemanticSimilarityCreator(language)
+  semantic_similarity_creator.saveEmbeddings(datasetPath, dataset_split, savePath)
+
+fire.Fire(create_similarity_embeddings)
