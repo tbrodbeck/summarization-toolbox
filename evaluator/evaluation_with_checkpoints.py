@@ -2,8 +2,7 @@
 main file to start the evaluation from
 """
 import sys
-from timelogging import endLogging
-from timelogging.timeLog import log, startLogging
+from timelogging.timeLogLater import logOnce as log
 sys.path.append(".")
 import os
 from typing import Dict
@@ -91,21 +90,22 @@ def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples=10, m
     evaluation_basepath = f'evaluator/evaluations/{model_info.run_name}/{metric_type}{nr_samples}'
     checkpoint_dirs = eval_util.get_subdirs(run_path)
     log('initializing models..')
-    endLogging()
     model = initialize_model(run_path, model_info.language)
     evaluator = prepare_evaluator(model.tokenizer, metric_type, model_info.language, dataset_name, nr_samples, run_path, model_info.model_name)
+
+    log('evaluating reference_model')
     reference_model = initialize_reference_model(model_info.language)
     df = evaluator.create_data_frame(evaluator.get_score_dict(reference_model))
     evaluator.save_data_frame(df, f"{evaluation_basepath}/0-iterations/Overview.xlsx", file_format="excel")
 
     for checkpoint_dir in checkpoint_dirs:
+        log('initializing', checkpoint_dir)
         checkpoint_model_path = os.path.join(run_path, checkpoint_dir)
         checkpoint_model = initialize_model(checkpoint_model_path, model_info.language)
         log(f'Evaluating {checkpoint_dir}...')
         iterations = get_checkpoint_iterations(checkpoint_dir)
         df = evaluator.create_data_frame(evaluator.get_score_dict(checkpoint_model))
         evaluator.save_data_frame(df, f"{evaluation_basepath}/{iterations}-iterations/Overview.xlsx", file_format="excel")
-    startLogging()
     log(f'Evaluating final model...')
     evalutation_dict = evaluator.get_score_dict(model)
 
