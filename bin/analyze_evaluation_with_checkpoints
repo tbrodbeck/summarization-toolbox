@@ -1,0 +1,12 @@
+#!python
+import sys
+sys.path.append(".")
+from evaluator import analysis, evaluation_with_checkpoints
+import fire
+
+def analyze_evaluation_with_checkpoints(eval_path: str):
+  evaluation_comparer = analysis.EvaluationComparer(eval_path)
+  evaluation_comparer.save_dataframe()
+  # evaluation_comparer.plot_analysis() TODO
+
+fire.Fire(analyze_evaluation_with_checkpoints)

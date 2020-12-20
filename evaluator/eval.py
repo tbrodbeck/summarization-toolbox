@@ -9,6 +9,7 @@ from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from evaluator.metrics import Metric
 from utilities.io_utils import write_table, check_make_dir
 from utilities.cleaning_utils import limit_data
+from typing import List
 
 
 def run_evaluation(
@@ -191,8 +192,8 @@ class Evaluator:
         )
         return source_tokens, target_tokens
 
-    def get_model_predictions(self, model: AbstractiveSummarizer):
-        return model.predict(self.data["source"])
+    def get_model_predictions(self, model: AbstractiveSummarizer, data: List[str]) -> List[str]:
+        return model.predict(data)
 
     def get_metric(
         self,
@@ -210,7 +211,7 @@ class Evaluator:
     def get_score_dict(
         self,
         model: AbstractiveSummarizer) -> dict:
-        predictions = self.get_model_predictions(model)
+        predictions = self.get_model_predictions(model, self.data["source"])
 
         text_dict = {
             "source_text": self.source_text,
@@ -225,11 +226,6 @@ class Evaluator:
 
     def get_scores(self, predictions: list) -> dict:
         score_dict = dict()
-
-        score_dict["gold_score"] = self.get_metric(
-            self.source_text,
-            self.target_text
-        )
 
         score_dict["prediction_score"] = self.get_metric(
             self.source_text, predictions
