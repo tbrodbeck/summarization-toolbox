@@ -31,7 +31,7 @@ class EvalRunAnalyzer():
     return float(eval_run_dir.split("-")[0])
 
 class EvaluationComparer():
-  def __init__(self, eval_path: str, metrics_for_comparison: List[str] = ['gold_score', 'fine_tuned_score', 'summary_similarity_score']):
+  def __init__(self, eval_path: str, metrics_for_comparison: List[str] = ['prediction_score', 'summary_similarity_score']):
     self.eval_path = eval_path
     self.metrics_for_comparison = metrics_for_comparison
     self.eval_dirs = eval_util.get_subdirs(self.eval_path)
@@ -64,4 +64,4 @@ class EvaluationComparer():
 
 def convert_rows_to_sorted_df(row_list):
   df = pd.DataFrame(row_list)
-  return df.sort_values('iterations')
+  return df.sort_values('iterations', ignore_index=True)

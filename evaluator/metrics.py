@@ -10,15 +10,15 @@ import torch
 
 class Metric:
     """Interface for Metrics"""
-    def get_score(self, prediction: str, target: str) -> float:
+    def get_score(self, text1: str, text2: str) -> float:
         return 0.0
 
 class Rouge(Metric):
     def __init__(self):
         self.r = pyrouge.Rouge()
 
-    def get_score(self, prediction: str, target: str) -> float:
-        [_, _, f_score] = self.r.rouge_l([prediction], [target])
+    def get_score(self, text1: str, text2: str) -> float:
+        [_, _, f_score] = self.r.rouge_l([text1], [text2])
         return f_score
 
 class SemanticSimilarityMetric(Metric):
@@ -51,8 +51,8 @@ class SemanticSimilarityMetric(Metric):
 
     def init_embeddings(self, embeddings_path: str, dataset_split: str):
         if embeddings_path:
-            source_embeddings = load_embeddings(embeddings_path, dataset_split, "source")
-            target_embeddings = load_embeddings(embeddings_path, dataset_split, "target")
+            source_embeddings = self.load_embeddings(embeddings_path, dataset_split, "source")
+            target_embeddings = self.load_embeddings(embeddings_path, dataset_split, "target")
             return {**source_embeddings, **target_embeddings}
         else:
             return {}
@@ -61,23 +61,17 @@ class SemanticSimilarityMetric(Metric):
         load_file_path = os.path.join(embeddings_path, f"{dataset_split}_{dataset_type}.pt")
         return torch.load(load_file_path)
 
-    def get_score(self, prediction: str, target: str) -> float:
+    def get_score(self, text1: str, text2: str) -> float:
         """calculates score for the semantic similarity metric
            higher score -> higher semanctic similarity
-
-        Args:
-            prediction (str): predicted summary
-            target (str): ground truth
-
         Returns:
             float: similarity score
         """
-
-        prediction_embeddings = get_embedding(prediction)
-        target_embeddings = get_embedding(target)
+        text1_embeddings = self.get_embedding(text1)
+        text2_embeddings = self.get_embedding(text2)
 
         score = self.cosine_similarity(
-            prediction_embeddings.unsqueeze(0), target_embeddings.unsqueeze(0))
+            text1_embeddings.unsqueeze(0), text2_embeddings.unsqueeze(0))
 
         return score.item()
 
@@ -85,7 +79,6 @@ class SemanticSimilarityMetric(Metric):
         if text in self.saved_embeddings.keys():
             return self.saved_embeddings[text]
         else:
-            return self.transformer.encode(text)
-
+            return torch.tensor(self.transformer.encode(text, show_progress_bar=False))
     def create_embedding(self, text: str) -> torch.Tensor:
         return torch.tensor(self.transformer.encode(text, show_progress_bar=False))

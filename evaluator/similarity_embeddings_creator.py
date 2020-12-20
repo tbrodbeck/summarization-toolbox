@@ -1,11 +1,21 @@
 import sys
 sys.path.append(".")
 from . import metrics
+import logging
 from os.path import join
-from timelogging.timeLog import log
 import torch
 from typing import Dict
 from utilities import io_utils
+
+
+logging.basicConfig(
+    format="%(asctime)s %(levelname)-8s %(message)s",
+    datefmt="%H:%M:%S",
+)
+
+infoLogger = logging.getLogger()
+infoLogger.setLevel(logging.INFO)
+log = infoLogger.log
 
 class SemanticSimilarityCreator():
   def __init__(self, language: str):
