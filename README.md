@@ -14,7 +14,7 @@ python dataProvider/main.py golem WikinewsSum/t5-base-multi-de-wiki-news t5-base
 
 Run Training (freezing layers: True/False)
 ```sh
-pyton bin/run_training golem WikinewsSum/t5-base-multi-de-wiki-news
+python bin/run_training golem WikinewsSum/t5-base-multi-de-wiki-news
 ```
 
 
@@ -33,7 +33,7 @@ It requires to have a dataset in the `dataProvider/datasets/$DATASETNAME` direct
 
 The sources (full texts) for summarization should be provided in a `sources.txt` file and the target summarizations should be provided in a `targets.txt` file.
 
-Now the `--createSplits` flag has to be used to create the `train`, `val` and `test` files in that directory, which will then be the resource for the tokenization.
+Now the `--create_splits` flag has to be used to create the `train`, `val` and `test` files in that directory, which will then be the resource for the tokenization.
 
 #### Providing Train, Val and Test Split Files
 
@@ -62,7 +62,7 @@ python dataProvider/main.py $DATASETNAME $TOKENIZERNAME $MODELNAME <flags>
 
 Limits the amount of samples that are taken for tokenization for each split. Defaults to `None`.
 
-##### `--createSplits=$CREATESPLITS`
+##### `--create_splits=$CREATESPLITS`
 
 Split the dataset into train, validation and test splits. Defaults to `False`.
 
