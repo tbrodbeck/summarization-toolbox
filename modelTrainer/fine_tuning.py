@@ -90,7 +90,7 @@ def fine_tune_model(
     try:
         training_history = trainer.train()
         # save training history
-        with open(final_path + "/training_history.pickle", "w") as history_file:
+        with open(final_path + "/training_history.pickle", "wb") as history_file:
             pickle.dump(training_history, history_file)
 
     finally:
