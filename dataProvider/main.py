@@ -155,6 +155,5 @@ def provide_data(
             assertFileInxestent(tensor_path)
             torch.save(tokens, tensor_path)
 
-
 if __name__ == "__main__":
     fire.Fire(provide_data)

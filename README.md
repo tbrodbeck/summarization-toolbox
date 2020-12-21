@@ -6,6 +6,21 @@
 pip install -r requirements.txt
 ```
 
+## Run on GPU
+Produce data (filtering: True/False)
+```sh
+python dataProvider/main.py golem WikinewsSum/t5-base-multi-de-wiki-news t5-base --create_splits=True --filtering=False
+```
+
+Run Training (freezing layers: True/False)
+```sh
+pyton bin/run_training golem WikinewsSum/t5-base-multi-de-wiki-news
+```
+
+
+
+
+
 ## Data Provider
 
 Provides tokenized data for training.
