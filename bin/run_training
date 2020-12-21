@@ -1,0 +1,13 @@
+#!python
+import sys
+sys.path.append(".")
+from modelTrainer.main import initialize_trainer
+import fire
+
+def run_training(dataset_name: str, model_name: str, config_name: str = None):
+  if config_name:
+    initialize_trainer(dataset_name=dataset_name, model_name=model_name, config_name=config_name)
+  else:
+    initialize_trainer(dataset_name=dataset_name, model_name=model_name)
+
+fire.Fire(run_training)
