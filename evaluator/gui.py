@@ -82,10 +82,10 @@ class UI(QMainWindow):
       self.scroll.setWidget(self.central_frame)
 
       central_layout.addWidget(self.scroll)
-      central_widget = QWidget()
-      central_widget.setLayout(central_layout)
+      self.central_widget = QWidget()
+      self.central_widget.setLayout(central_layout)
 
-      self.setCentralWidget(central_widget)
+      self.setCentralWidget(self.central_widget)
       self.setWindowTitle('Sesame Street')
 
       if model_dir != 'dev':
@@ -106,7 +106,7 @@ class UI(QMainWindow):
 
   def originalSize(self):
     ''' resets font size '''
-    self.centralWidget.setFont(QFont(".AppleSystemUIFont", 13))
+    self.central_widget.setFont(QFont(".AppleSystemUIFont", 13))
 
   def minimize(self):
     ''' minimize window in operating system '''
@@ -135,13 +135,6 @@ class UI(QMainWindow):
     modelRunner.start()
     modelRunner.summary_output.connect(self.summarize_finished)
     self.input.setFocus()
-    # print(1)
-    # self.input.clear()
-    # print('try1')
-    # self.input.clear()
-    # import time
-    # time.sleep(4)
-    # print('2')
 
   def summarize_finished(self, summary_output):
     self.header_frame.show()
@@ -172,6 +165,8 @@ class UI(QMainWindow):
     texts = self.read_lines_from_file_path(file_path)
     for i, text in enumerate(texts):
       self.summarize_string(text, self.next_summary_position + i)
+      if i == 10:
+        break
     self.next_summary_position += len(texts)
     self.append_new_row_to_layout()
 
@@ -188,13 +183,13 @@ class UI(QMainWindow):
 
   def zoomIn(self):
     ''' increases font size '''
-    size = self.centralWidget.font().pointSize()
-    self.centralWidget.setFont(QFont(".AppleSystemUIFont", size + 2))
+    size = self.central_widget.font().pointSize()
+    self.central_widget.setFont(QFont(".AppleSystemUIFont", size + 2))
 
   def zoomOut(self):
     ''' decreases font size '''
-    size = self.centralWidget.font().pointSize()
-    self.centralWidget.setFont(QFont(".AppleSystemUIFont", size - 2))
+    size = self.central_widget.font().pointSize()
+    self.central_widget.setFont(QFont(".AppleSystemUIFont", size - 2))
 
 class ModelRunner(QThread):
   def __init__(self, model: AbstractiveSummarizer, text: str, position_in_layout: int, parent: QMainWindow):
