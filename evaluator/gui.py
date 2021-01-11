@@ -214,7 +214,10 @@ def sigint_handler(*args):
     QApplication.quit()
 
 def run_gui(model_dir: str):
-  ''' execute the gui '''
+  """execute the gui
+  Args:
+      model_dir (str): directory of the summarization model to use
+  """
   app = QApplication(sys.argv)
   ui = UI(model_dir)
   ui.resize(800, 600)  # (width, length) default size in pixels
