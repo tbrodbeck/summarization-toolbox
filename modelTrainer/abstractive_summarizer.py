@@ -7,7 +7,7 @@ import os
 from typing import Union, Optional, Tuple
 
 import spacy
-from transformers import AutoModelWithLMHead, AutoTokenizer
+from transformers import AutoModelWithLMHead, AutoTokenizer, AdamW
 import torch
 from utilities.io_utils import check_make_dir
 from utilities.cleaning_utils import truncate_incomplete_sentences
@@ -91,8 +91,8 @@ class AbstractiveSummarizer:
             return AutoModelWithLMHead.from_pretrained(self.model_path), \
                 AutoTokenizer.from_pretrained(self.model_name)
 
-    @staticmethod
-    def freeze_params(component: object):
+
+    def freeze_params(self, component: object):
         """make model component un-trainable
 
         Args:
@@ -124,7 +124,7 @@ class AbstractiveSummarizer:
                 if model_component == 'decoder':
                     self.freeze_params(self.model.decoder.embed_tokens)
                 if model_component == 'lm_head':
-                    self.freeze_params(self.model.model.lm_head)
+                    self.freeze_params(self.model.lm_head)
 
     def predict(self,
                 source: Union[str, dict],
