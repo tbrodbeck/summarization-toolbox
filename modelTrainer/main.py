@@ -170,7 +170,8 @@ def initialize_trainer(
         model_parameters["language"],
         model_parameters["status"]
     )
-
+    if model_parameters["freezed_components"] != "None":
+        model.freeze_model_layers(model_parameters["freezed_components"].strip().split(";"))
     ###################################
     # Run fine tuning
     ###################################
