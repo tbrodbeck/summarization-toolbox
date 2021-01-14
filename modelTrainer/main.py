@@ -66,13 +66,15 @@ DATA_DIRECTORY = "./dataProvider/datasets/"
 def initialize_trainer(
         dataset_name: str,
         model_name: str,
-        config_name: Optional[str] = "fine_tuning_config.ini"):
+        config_name: Optional[str] = "fine_tuning_config.ini",
+        filtered: bool = True):
     """fine tuning pipeline initialization
 
     Args:
         dataset_name (str): name of the dataset used for training
         model_name (str): model to fine tune on
         config_name (Optional[str], optional): name of config file.
+        filtered (bool, optional): choose filtered or unfiltered tensors for training. Defaults to True.
         Defaults to "fine_tuning_config.ini".
     """
     ###################################
@@ -97,14 +99,16 @@ def initialize_trainer(
 
     # check tensors folder
     dataset_dir = os.path.join(DATA_DIRECTORY, dataset_name)
+    if filtered:
+        filter_str = "_filtered"
+    else:
+        filter_str = ""
     try:
-        tensor_dir = os.path.join(dataset_dir, model_name)
+        tensor_dir = os.path.join(dataset_dir, model_name + filter_str)
         assert os.path.isdir(tensor_dir)
-    except Exception:
-        tensor_dir = os.path.join(dataset_dir, model_name + "_filtered")
-        assert os.path.isdir(
-            tensor_dir), f"Neither '{tensor_dir} nor '{tensor_dir}_filtered' exists!"
-
+    except:
+        raise AssertionError(f"Neither '{tensor_dir} nor '{tensor_dir}_filtered' exists!")
+        
     data_files = [file for file in os.listdir(tensor_dir)
                   if '.pt' in file]
 

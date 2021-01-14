@@ -5,7 +5,7 @@ using the T5 model
 
 import os
 from typing import Union, Optional, Tuple
-
+from timelogging.timeLogLater import logOnce as log
 import spacy
 from transformers import AutoModelWithLMHead, AutoTokenizer, AdamW
 import torch
@@ -173,7 +173,7 @@ class AbstractiveSummarizer:
                 truncation="longest_first",
                 return_tensors="pt").to(self.device)['input_ids']]
             n_tokens = [
-                len([i for i in model_inputs[0].squeeze().numpy() if i != 0])]
+                len([i for i in model_inputs[0].squeeze().detach().cpu().numpy() if i != 0])]
 
             return_string = True
         else:
@@ -186,35 +186,42 @@ class AbstractiveSummarizer:
 
         # produce summary
         summary_texts = list()
-        for tokens, upper_bound, lower_bound in \
-                zip(model_inputs, upper_bounds, lower_bounds):
-            summary_ids = self.model.generate(
-                tokens.to(self.device),
-                num_beams=5,
-                no_repeat_ngram_size=2,
-                min_length=lower_bound,
-                max_length=upper_bound,
-                early_stopping=True
-            ).to(self.device)
+        try:
+            for tokens, upper_bound, lower_bound in \
+                    zip(model_inputs, upper_bounds, lower_bounds):
+                summary_ids = self.model.generate(
+                    tokens.to(self.device),
+                    num_beams=5,
+                    no_repeat_ngram_size=2,
+                    min_length=lower_bound,
+                    max_length=upper_bound,
+                    early_stopping=True
+                ).to(self.device)
 
-            # convert the ids to text
-            summary_text = self.tokenizer.decode(
-                summary_ids[0],
-                skip_special_tokens=True
-            )
+                # convert the ids to text
+                summary_text = self.tokenizer.decode(
+                    summary_ids[0],
+                    skip_special_tokens=True
+                )
 
-            if truncation:
-                # remove incomplete sentences
-                summary_text = truncate_incomplete_sentences(
-                    summary_text, self.nlp)
-                # remove leading blanks
-                summary_text = summary_text.strip()
+                if truncation:
+                    # remove incomplete sentences
+                    summary_text = truncate_incomplete_sentences(
+                        summary_text, self.nlp)
+                    # remove leading blanks
+                    summary_text = summary_text.strip()
 
-            summary_texts.append(
-                summary_text
-            )
+                summary_texts.append(
+                    summary_text
+                )
+        except:
+            log("A problem producing the summary occured!")
+            summary_texts.append([""])
+            
 
         # outcome dependent on input format
         if return_string:
+            if summary_texts[0] == "":
+                log("Input text too short for summarization!")
             return summary_texts[0]
         return summary_texts
