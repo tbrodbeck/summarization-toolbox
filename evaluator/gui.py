@@ -6,7 +6,7 @@ sys.path.insert(0, str(pathlib.Path(os.getcwd())))
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
 from PyQt5.QtCore import pyqtSignal, Qt, QEvent, QTimer, QThread
 from PyQt5.QtGui import QFont, QKeySequence, QWindow
-from PyQt5.QtWidgets import QAction, QApplication, QFrame, QHBoxLayout, QLabel, QMainWindow, QFileDialog, QGridLayout, QScrollArea, QVBoxLayout, QPlainTextEdit, QPushButton, QSizePolicy, QTextEdit, QWidget
+from PyQt5.QtWidgets import QAction, QApplication, QFrame, QHBoxLayout, QLabel, QMainWindow, QFileDialog, QGridLayout, QScrollArea, QVBoxLayout, QPlainTextEdit, QPushButton, QSizePolicy, QSlider, QTextEdit, QWidget
 import signal
 from timelogging.timeLog import log
 
@@ -40,14 +40,13 @@ class UI(QMainWindow):
 
       # # label row
       header_layout = QHBoxLayout()
-      text_label = QLabel('Text')
+      text_label = QLabel('Source')
       text_label.setAlignment(Qt.AlignCenter)
       header_layout.addWidget(text_label)
       summarizer_label = QLabel('T5 Summarizer')
       summarizer_label.setAlignment(Qt.AlignCenter)
       header_layout.addWidget(summarizer_label)
       header_layout.setContentsMargins(0, 0, 0, 0)
-      # central_layout.addLayout(header_layout)
       self.header_frame = QFrame()
       self.header_frame.setLayout(header_layout)
       central_layout.addWidget(self.header_frame)
@@ -67,6 +66,23 @@ class UI(QMainWindow):
       uploadFileButton = QPushButton('Upload text file')
       uploadFileButton.clicked.connect(self.upload_file_event)
       setup_layout.addWidget(uploadFileButton)
+      slider_layout = QHBoxLayout()
+      slider_layout.addWidget(QLabel('Summary length:'))
+      self.sl = QSlider(Qt.Horizontal)
+      self.sl.setMinimum(1)
+      self.sl.setMaximum(3)
+      self.sl.setValue(1)
+      self.sl.setTickInterval(1)
+      self.slider_len_settings = {
+        1: (0.05, 0.15),
+        2: (0.25, 0.4),
+        3: (0.5, 0.65)
+      }
+      self.lower_token_ratio = self.slider_len_settings[1][0]
+      self.upper_token_ratio = self.slider_len_settings[1][1]
+      self.sl.valueChanged.connect(self.slider_value_change)
+      slider_layout.addWidget(self.sl)
+      setup_layout.addLayout(slider_layout)
       setup_layout.addStretch(1)
       setup_layout.setContentsMargins(0, 0, 0, 0)
       self.setup_widget = QWidget()
@@ -95,6 +111,12 @@ class UI(QMainWindow):
                                                                       status="fine-tuned"
                                                                   )
       self.next_summary_position = 1
+
+  def slider_value_change(self):
+    setting_nr = self.sl.value()
+    len_setting = self.slider_len_settings[setting_nr]
+    self.lower_token_ratio = len_setting[0]
+    self.upper_token_ratio = len_setting[1]
 
   def eventFilter(self, obj, event):
     ''' activates self.summarize when Enter is pressed '''
@@ -131,7 +153,7 @@ class UI(QMainWindow):
     summarize_label = QLabel('Summarizing...')
     summarize_label.setAlignment(Qt.AlignCenter)
     self.summarizationLayout.addWidget(summarize_label, position_in_layout, 1)
-    modelRunner = ModelRunner(self.summarizer, text, position_in_layout, parent=self)
+    modelRunner = ModelRunner(self.summarizer, text, position_in_layout, window=self)
     modelRunner.start()
     modelRunner.summary_output.connect(self.summarize_finished)
     self.input.setFocus()
@@ -192,16 +214,17 @@ class UI(QMainWindow):
     self.central_widget.setFont(QFont(".AppleSystemUIFont", size - 2))
 
 class ModelRunner(QThread):
-  def __init__(self, model: AbstractiveSummarizer, text: str, position_in_layout: int, parent: QMainWindow):
-    super().__init__(parent=parent)
+  def __init__(self, model: AbstractiveSummarizer, text: str, position_in_layout: int, window: QMainWindow):
+    super().__init__(parent=window)
     self.model = model
     self.text = text
     self.position_in_layout = position_in_layout
+    self.window = window
 
   summary_output = pyqtSignal(dict)
 
   def run(self):
-    summary = self.model.predict(self.text)
+    summary = self.model.predict(self.text, upper_token_ratio=self.window.upper_token_ratio, lower_token_ratio=self.window.lower_token_ratio)
     self.summary_output.emit({"summary": summary, "position_in_layout": self.position_in_layout})
 
 def sigint_handler(*args):
