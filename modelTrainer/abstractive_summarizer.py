@@ -216,7 +216,7 @@ class AbstractiveSummarizer:
                 )
         except:
             log("A problem producing the summary occured!")
-            summary_texts.append([""])
+            summary_texts.append("")
             
 
         # outcome dependent on input format
