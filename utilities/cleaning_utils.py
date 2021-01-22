@@ -50,7 +50,7 @@ def truncate_incomplete_sentences(text: str, nlp) -> str:
             # remove the last, incomplete sentence
             sentences = [sent for sent in doc.sents]
             if len(sentences) < 2:
-                return text
+                return None
             else:
                 return text[:sentences[-2].end_char]
 
