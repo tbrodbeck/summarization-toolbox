@@ -129,8 +129,9 @@ class AbstractiveSummarizer:
     def predict(self,
                 source: Union[str, dict],
                 truncation: bool = True,
-                upper_token_ratio: float = 0.15,
-                lower_token_ratio: float = 0.05) -> Union[list, str]:
+                upper_token_ratio: float = 0.20,
+                lower_token_ratio: float = 0.10,
+                max_generations: int = 1) -> Union[list, str]:
         """inference from the summary model based on given texts
 
         Args:
@@ -141,6 +142,8 @@ class AbstractiveSummarizer:
             Defaults to 0.15.
             lower_token_ratio (float, optional): set the lower bound for the summary.
             Defaults to 0.05.
+            max_generations (int, optional): how often the model re generates a summary if too short.
+            Defaults to 1.
 
         Raises:
             ValueError: wrong input format
@@ -186,30 +189,48 @@ class AbstractiveSummarizer:
 
         # produce summary
         summary_texts = list()
+        self.model.to(self.device)
+        self.tokenizer.to(self.device)
         try:
             for tokens, upper_bound, lower_bound in \
                     zip(model_inputs, upper_bounds, lower_bounds):
-                summary_ids = self.model.generate(
-                    tokens.to(self.device),
-                    num_beams=5,
-                    no_repeat_ngram_size=2,
-                    min_length=lower_bound,
-                    max_length=upper_bound,
-                    early_stopping=True
-                ).to(self.device)
+                regenerate = True
+                count_regenerate = 0
+                while regenerate:
 
-                # convert the ids to text
-                summary_text = self.tokenizer.decode(
-                    summary_ids[0],
-                    skip_special_tokens=True
-                )
+                    summary_ids = self.model.generate(
+                        tokens.to(self.device),
+                        num_beams=5,
+                        no_repeat_ngram_size=2,
+                        min_length=lower_bound,
+                        max_length=upper_bound,
+                        early_stopping=True
+                    )
 
-                if truncation:
-                    # remove incomplete sentences
-                    summary_text = truncate_incomplete_sentences(
-                        summary_text, self.nlp)
-                    # remove leading blanks
-                    summary_text = summary_text.strip()
+                    # convert the ids to text
+                    summary_text = self.tokenizer.decode(
+                        summary_ids[0],
+                        skip_special_tokens=True
+                    )
+
+                    if truncation:
+                        # remove incomplete sentences
+                        summary_text = truncate_incomplete_sentences(
+                            summary_text, self.nlp)
+
+                    regenerate = False
+                    if summary_text is None:
+                        if count_regenerate <= 0:
+                            regenerate = True
+                            log("Summary to short -> Regenerating!")
+                            count_regenerate += 1
+                            lower_bound = int(lower_bound * 1.5)
+                            upper_bound = int(upper_bound * 1.5)
+                        else:
+                            summary_text = "NO COMPLETE SENTENCE! PLEASE INCREASE UPPER BOUND!"
+
+                # remove leading blanks
+                summary_text = summary_text.strip()
 
                 summary_texts.append(
                     summary_text
