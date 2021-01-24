@@ -42,6 +42,11 @@ def fine_tune_model(
             (data_dict["train"]["source"], data_dict["train"]["target"])
         )
 
+    if parameters["limit_val_data"] != "-1":
+        val_data = val_data[:min(
+            len(val_data), int(parameters["limit_val_data"])
+        )]
+
     # recursively create output directory
     check_make_dir(results_path)
     model_type = summary_model.short_name
@@ -54,9 +59,9 @@ def fine_tune_model(
             break
         model_version += 1
         final_path = os.path.join(results_path, model_type, str(model_version))
-
+        logs_path = os.path.join(results_path, model_type, "logs", str(model_version))
+        
     # prepare path for logs
-    logs_path = os.path.join('/'.join(final_path.split('/')[:-2]), 'logs')
     check_make_dir(logs_path, create_dir=True)
 
     # initialize the training parameters
@@ -70,10 +75,12 @@ def fine_tune_model(
             parameters["val_batch_size"]) if val_data else None,  # batch size for evaluation
         do_eval=bool(val_data),
         eval_steps=500,
+        evaluate_during_training=True,
         warmup_steps=500,  # number of warmup steps for learning rate scheduler
         weight_decay=0.01,  # strength of weight decay
         logging_dir=logs_path,  # directory for storing logs
-        logging_steps=500,
+        logging_steps=100,
+        logging_first_step=True,
         save_steps=int(parameters["checkpoint_steps"]),
         do_train=True
     )
@@ -84,6 +91,7 @@ def fine_tune_model(
         args=training_args,  # training arguments, defined above
         train_dataset=train_data,  # training dataset
         eval_dataset=val_data if val_data else None,  # evaluation dataset
+        prediction_loss_only=True
     )
 
     # perform the training

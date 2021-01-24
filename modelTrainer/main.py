@@ -57,7 +57,8 @@ TRAINING_CONFIG = [
     "train_batch_size",
     "val_batch_size",
     "checkpoint_steps",
-    "number_samples"
+    "number_samples",
+    "limit_val_data"
 ]
 
 DATA_DIRECTORY = "./dataProvider/datasets/"
@@ -66,8 +67,8 @@ DATA_DIRECTORY = "./dataProvider/datasets/"
 def initialize_trainer(
         dataset_name: str,
         model_name: str,
-        config_name: Optional[str] = "fine_tuning_config.ini",
-        filtered: bool = True):
+        filtered: bool = True,
+        config_name: Optional[str] = "fine_tuning_config.ini"):
     """fine tuning pipeline initialization
 
     Args:
