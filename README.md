@@ -1,25 +1,39 @@
 # Summarization Toolbox
 
+## Introduction
+This repository provides an end-to-end pipeline to fine-tune a 🤗-Summary-Model on your own corpus.<br>
+It is subdividet in those three parts:
+- Read and prepare data for training (_dataProvider_)
+- Fine tune a selected 🤗-Model on the provided data (_modelTrainer_)
+- Automated evaluation of the fine tuned model on validation set (_evaluator_)
+
+The pipeline supports _german_ and _english_ texts to be summarized. For both languages a __T5__ model
+is used which can further be explored in the paper
+[Exploring the Limits of Transfer Learning with a Unified Text-to-Text Transformer](https://arxiv.org/abs/1910.10683).
+<br>  
+Huggingface Models:
+- german: [t5-base-multi-de-wiki-news](https://huggingface.co/WikinewsSum/t5-base-multi-de-wiki-news)
+- english: [t5-base](https://huggingface.co/t5-base)
+
+#### Process Description
+1. provide _source_ and _target_ files with matching text-summary-pairs. These are split and converted to the right format for the fine-tuning task.
+2. choose one of the supported languages and set training parameters via a config file. Then run the training on your data.
+3. evaluate the produced model checkpoints and compare them either by the `Rouge-L` or the specially developed `SemanticSimilarity` metric. You can also track the training metrics via [TensorBoard](https://www.tensorflow.org/tensorboard).
+
+#### Example
+The following example was produced by one of our german models which was fine-tuned on our specially scraped [Golem](https://www.golem.de/) corpus. <br>
+
+_Original Text:_<br>
+Tamrons neues Objektiv ist ein Weitwinkelzoom für Canon- und Nikonkameras mit Kleinbildsensor, das über 15 Elemente verfügt, darunter dispersionsarme und asphärische. Der sogenannte Silent Drive Motor ermöglicht laut Hersteller eine hohe Geschwindigkeit beim Scharfstellen und eine niedrige Geräuschentwicklung. Die minimale Fokusdistanz wird mit 28 cm angegeben. Die feuchtigkeitsbeständige Konstruktion und die Fluorbeschichtung des Frontelements sollen dazu beitragen, dass das Objektiv auch bei harschen Wetterbedingungen funktioniert. Das Objektiv misst 84 mm x 93 mm und weist einen Filterdurchmesser von 77 mm auf. Das 17-35 mm F2.8-4 Di OSD von Tamron soll Anfang September 2018 für Nikon FX erhältlich sein, ein Canon-EF-Modell wird später folgen. Der Preis wird mit rund 600 US-Dollar angegeben. Deutsche Daten liegen noch nicht vor.
+
+_Produced Summary:_<br>
+Tamron hat mit dem 17-35 mm F2.8-4 Di OSD ein Weitwinkelzoom für Canon- und Nikon-Kameras vorgestellt, das über 15 Elemente verfügt.
+
 ## Installation
 
 ```sh
-pip install -r requirements.txt
+sh install_dependencies.sh
 ```
-
-## Run on GPU
-Produce data (filtering: True/False)
-```sh
-python dataProvider/main.py golem WikinewsSum/t5-base-multi-de-wiki-news t5-base --create_splits=True --filtering=False
-```
-
-Run Training (freezing layers: True/False)
-```sh
-python bin/run_training golem WikinewsSum/t5-base-multi-de-wiki-news
-```
-
-
-
-
 
 ## Data Provider
 
@@ -54,6 +68,11 @@ Use the Command Line Interface like this:
 
 ```sh
 python dataProvider/main.py $DATASETNAME $TOKENIZERNAME $MODELNAME <flags>
+```
+
+Example:
+```sh
+python dataProvider/main.py golem WikinewsSum/t5-base-multi-de-wiki-news t5-base --create_splits=True --filtering=True
 ```
 
 #### Flags
@@ -99,7 +118,14 @@ Performs training process for selected model on the previously created data sets
 
 To execute the __Model Training__ you need to previously run the __Data Provider__ module to generate training data in the right format either from your own or predefined text/summary pairs.
 It requires files in the output format of the __Data Provider__ module. Since you could have run the module for multiple text/summary sets, you have to provide the `$DATASETNAME` to train on.  
-Additionally you can choose a supported 🤗-Model with the `$MODELNAME` parameter (the model will be downloaded to your virtual environment if you run the training for the first time).
+Additionally you can choose a supported 🤗-Model with the `$MODELNAME` parameter (the model will be downloaded to your virtual environment if you run the training for the first time).<br>  
+
+#### Flags
+
+##### `--filtered=$FILTERED`
+By the `$FILTERED` flag you can specify if filtered or unfiltered data is used for training (if previously created by the Data Provider). It defaults to `True`.
+
+##### `--config_name=$CONFIGNAME`
 Since all model and training pipeline configurations are read from a config file (which has to be stored in the _./modelTrainer/config_ directory) you might also select your config file by setting the `$CONFIGNAME` parameter.  
 If you don't do so, this parameter defaults to _'fine_tuning.ini'_ (which could also be used as a template for your own configurations).
 
@@ -108,7 +134,12 @@ If you don't do so, this parameter defaults to _'fine_tuning.ini'_ (which could 
 Use the Command Line Interface like this:
 
 ```sh
-python modelTrainer/main.py $DATASETNAME $MODELNAME $CONFIGNAME
+python bin/run_training $DATASETNAME $MODELNAME <flags>
+```
+
+Example:
+```sh
+python bin/run_training golem WikinewsSum/t5-base-multi-de-wiki-news --filtered=False
 ```
 
 ### Configurations
@@ -122,19 +153,24 @@ Only the parameters in the provided _'fine_tuning_config.ini'_ file stored in th
 In the config file you choose an _output_directory_ in this directory the following folder structure is created:
 ```
 output_directory
-    └── logs
-    └── <model_shortname>
-        └── <model_version>
-            └── <checkpoint_folder>
+    └── model_shortname
+        └── model_version
+            └── checkpoint_folder
+            └── final_model_files
+        └── logs
+            └── model_version
+                └── tensorboard_file
 ```
 _<model_shortname>_ = Abbreviation for the chosen model  
 _<model_version>_ = Counts the versions (no override)  
-_<checkpoint_folder>_ = states of the model after a certain number of training steps
+_<checkpoint_folder>_ = states of the model after a certain number of training steps  
+_<tensorboard_file>_ = saved training metrics for TensorBoard usage
 
 After the training the following final output files are saved in the _<model_version>_ folder:
 - _config.json_
 - _training_args.bin_ (parameters for the [🤗-Trainer](https://huggingface.co/transformers/main_classes/trainer.html))
 - _pytorch_model.bin_ (model which can then be loaded for inference)
+- _model_info-yml_ (file with information used for evaluation)
 
 ## Evaluator
 
@@ -144,40 +180,68 @@ There are different evaluation methods available
 ### Input
 
 To execute the __Evaluation__ you need to previously run the __Model Trainer__ module to generate a fine-tuned  🤗-Model in the right format and stored in the correct folder structure.
-It requires a model stored in the following structure:
-```
-modelTrainer
-    └── results
-        └── logs
-        └── <model_short_name>
-            └── <version>
-                └── checkpoint-<checkpoint_number> or "model files"
-            
-```
-By "model files" these three files are required:
+These three files are required:
 - config.json
 - pytorch_model.bin
 - training_args.bin
 
-Since the model evaluation uses the test set created for the underlying training data you need to specify the `$DATASETNAME`.  
-Additionally you can choose the fine-tuned 🤗-Model with the `$MODELNAME` parameter.  
-All model and evaluation pipeline configurations are read from a config file (which has to be stored in the _./evaluator/config_ directory) you might also select your config file by setting the `$CONFIGNAME` parameter.  
-If you don't do so, this parameter defaults to _'evaluation_config.ini'_ (which could also be used as a template for your own configurations).
+Since the model evaluation uses the __validation set__ created for the underlying training data you need to specify the `$DATASETNAME`.  
+Additionally you can choose the fine-tuned 🤗-Model Checkpoints to compare by setting the `$RUNPATH` parameter. This path has to be the directory of the `checkpoint_folder` defined by the folder structure in the training section.
+
+#### Flags
+
+##### `--nr_samples=$SAMPLES`
+Number of samples selected from the data set to evaluate the checkpoint on. Defaults to __10__
+
+##### `--metric_type=$METRIC`
+It can be chosen from the two metric types:
+- Rouge-L: set parameter to "Rouge"
+- Semantic Similarity: set parameter to "SemanticSimilarity"
+
+Defaults to __Rouge__.
 
 ### Usage
 
 Use the Command Line Interface like this:
 
 ```sh
-python evaluator/main.py $DATASETNAME $MODELNAME $CONFIGNAME
+python bin/evaluate_with_checkpoints_and_compare $DATASETNAME $MODELNAME <flags>
 ```
 
-### Configurations
+Example:
+```sh
+python bin/evaluate_with_checkpoints_and_compare golem WikinewsSum/t5-base-multi-de-wiki-news --nr_samples=1000 --metric_type=SemanticSimilarity
+```
 
-The pipeline is designed to inherit all customizable parameters from an _'.ini'_ file.
-It follows the structure that a component is defined by `[COMPONENT]` and the assigned parameters by `parameter = parameter_value` (as string).
-Only the parameters in the provided _'evaluation_config.ini'_ file stored in the _config_ folders can be changed.
+### Output
 
+By defalut the produced _Overview.xlsx_ files are stored in the __evaluator__ directory under the following structure:
+```
+evaluator
+    └── evaluations
+        └── model_short_name
+            └── model_version
+                └── checkpoint_folders
+                    └── metric_type-sample_name-folders
+                        └── iteration-folders
+                            - Overview.xlsx
+                ...
+                - analysis.xlsx
+```
+
+## TensorBoard
+During the training a `TensorBoard` file is produced which can then be activated to track your training parameters and metrics afterwards in your localhost.
+To access the TensorBoard the library _tensorboard_ has to be installed (requirements.txt) and you can use the following CLI to activate it:
+
+```sh
+tensorboard --logdir <tensorboard_log_dir>
+```
+In the <tensorboard_log_dir> a _events.out.tfevents..._-file should exist. The directory is described by the folder structure in the training section.
+
+Example:
+```sh
+tensorboard --logdir ./results/t5-de/logs/0
+```
 
 ## Development Instructions
 

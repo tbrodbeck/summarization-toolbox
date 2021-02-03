@@ -7,7 +7,7 @@ import os
 from typing import Union, Optional, Tuple
 from timelogging.timeLogLater import logOnce as log
 import spacy
-from transformers import AutoModelWithLMHead, AutoTokenizer, AdamW
+from transformers import AutoModelWithLMHead, AutoTokenizer
 import torch
 from utilities.io_utils import check_make_dir
 from utilities.cleaning_utils import truncate_incomplete_sentences
@@ -82,6 +82,7 @@ class AbstractiveSummarizer:
             "pytorch_model.bin",
             "training_args.bin"
         ]
+        log(f"initialized {self.language} model: {self.model_name}")
         if self.status == 'base':
             return AutoModelWithLMHead.from_pretrained(self.model_name), \
                 AutoTokenizer.from_pretrained(self.model_name)
