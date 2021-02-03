@@ -66,15 +66,15 @@ DATA_DIRECTORY = "./dataProvider/datasets/"
 def initialize_trainer(
         dataset_name: str,
         model_name: str,
-        config_name: Optional[str] = "fine_tuning_config.ini",
-        filtered: bool = True):
+        filtered: bool = True,
+        config_name: Optional[str] = "fine_tuning_config.ini"):
     """fine tuning pipeline initialization
 
     Args:
         dataset_name (str): name of the dataset used for training
         model_name (str): model to fine tune on
-        config_name (Optional[str], optional): name of config file.
         filtered (bool, optional): choose filtered or unfiltered tensors for training. Defaults to True.
+        config_name (Optional[str], optional): name of config file.
         Defaults to "fine_tuning_config.ini".
     """
     ###################################
