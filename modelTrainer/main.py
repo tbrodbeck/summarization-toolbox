@@ -58,7 +58,11 @@ TRAINING_CONFIG = [
     "val_batch_size",
     "checkpoint_steps",
     "number_samples",
-    "limit_val_data"
+    "limit_val_data",
+    "logging_steps",
+    "eval_steps",
+    "weight_decay",
+    "warmup_steps"
 ]
 
 DATA_DIRECTORY = "./dataProvider/datasets/"
