@@ -27,28 +27,17 @@ def provide_data(
         splits2tokenize: Optional[list] = SPLIT_NAMES,
         filtering: Optional[bool] = True):
     """Provides tokenized data for training
-
     Args:
         dataset_name (str): foldername in datasets directory
         tokenizer_name (str): huggingface tokenizer name (same as model name)
         model_name (str): huggingface model name
-        size (Optional[int], optional): Limits the amount of samples that are
-        taken for tokenization for each split.
-        create_splits (Optional[bool], optional): Split the dataset into train,
-        validation and test splits.
-        Has to be provided as a dict containing the keys `train` and `val` and
-        values between 0 and 1.
-        If `True` uses a default 80/10/10 split. Defaults to False.
-        splits2tokenize (Optional[list], optional): Can be set to only
-        tokenize certain splits. Defaults to SPLIT_NAMES.
-        filtering (Optional[bool], optional): Longer examples than the
-        maximum token size are filtered,
-        else they are truncated. Defaults to True.
-
+        size (Optional[int], optional): {Limits the amount of samples that are taken for tokenization for each split.
+        create_splits (Optional[bool], optional): Split the dataset into train, validation and test splits. Has to be provided as a dict containing the keys `train` and `val` and values between 0 and 1. If `True` uses a default 80/10/10 split. Defaults to False.
+        splits2tokenize (Optional[list], optional): Can be set to only tokenize certain splits. Defaults to SPLIT_NAMES.
+        filtering (Optional[bool], optional): Longer examples than the maximum token size are filtered, else they are truncated. Defaults to True.
     Raises:
         ValueError: incorrect inputs
-        IOError: incompatible text and summary number
-    """
+        IOError: incompatible text and summary number"""
     # checking input
     if not model_name in MODEL_NAMES:
         raise ValueError('unkown model')
@@ -85,9 +74,10 @@ def provide_data(
                 split_index = int((entries - previous_split_index)
                                   * split_fraction + previous_split_index)
                 split = text[previous_split_index:split_index]
-                write_txt('{}{}.{}'.format(
-                    dataset_dir, split_name, text_name), split)
-                previous_split_index = split_index
+                if len(split):
+                    write_txt('{}{}.{}'.format(
+                        dataset_dir, split_name, text_name), split)
+                    previous_split_index = split_index
             assert previous_split_index == entries, f'{previous_split_index} != {entries}'
 
     # tokenizing
@@ -106,6 +96,7 @@ def provide_data(
             dataset_dir, split_name, 'target'))
         text_length = len(source)
         assert text_length == len(target)
+        assert text_length > 0, f"split {split_name} has no entries"
         if size:  # optional limitation of samples for tokenization
             source = source[:size]
             target = target[:size]
