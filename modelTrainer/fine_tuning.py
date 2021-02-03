@@ -54,6 +54,7 @@ def fine_tune_model(
     model_version = 0
 
     final_path = os.path.join(results_path, model_type, str(model_version))
+    logs_path = os.path.join(results_path, model_type, "logs", str(model_version))
     while check_make_dir(final_path, create_dir=True):
         if len(os.listdir(final_path)) == 0:
             break
@@ -66,20 +67,19 @@ def fine_tune_model(
 
     # initialize the training parameters
     training_args = TrainingArguments(
-        output_dir=final_path,  # output directory
-        # total number of training epochs
+        output_dir=final_path,
         num_train_epochs=int(parameters["epochs"]),
-        # batch size per device during training
         per_device_train_batch_size=int(parameters["train_batch_size"]),
         per_device_eval_batch_size=int(
-            parameters["val_batch_size"]) if val_data else None,  # batch size for evaluation
+            parameters["val_batch_size"]
+        ) if val_data else None,
         do_eval=bool(val_data),
-        eval_steps=500,
-        evaluate_during_training=True,
-        warmup_steps=500,  # number of warmup steps for learning rate scheduler
-        weight_decay=0.01,  # strength of weight decay
-        logging_dir=logs_path,  # directory for storing logs
-        logging_steps=100,
+        eval_steps=int(parameters["eval_steps"]),
+        evaluate_during_training=bool(val_data),
+        warmup_steps=int(parameters["warmup_steps"]),
+        weight_decay=float(parameters["weight_decay"]),
+        logging_dir=logs_path,
+        logging_steps=int(parameters["logging_steps"]),
         logging_first_step=True,
         save_steps=int(parameters["checkpoint_steps"]),
         do_train=True
@@ -87,11 +87,11 @@ def fine_tune_model(
 
     # initialize the trainer class
     trainer = Trainer(
-        model=summary_model.model,  # the instantiated 🤗 Transformers model to be trained
-        args=training_args,  # training arguments, defined above
-        train_dataset=train_data,  # training dataset
-        eval_dataset=val_data if val_data else None,  # evaluation dataset
-        prediction_loss_only=True
+        model=summary_model.model,
+        args=training_args,
+        train_dataset=train_data,
+        eval_dataset=val_data if val_data else None,
+        prediction_loss_only=True # loss for logging
     )
 
     # perform the training
