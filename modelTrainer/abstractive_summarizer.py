@@ -190,7 +190,6 @@ class AbstractiveSummarizer:
         # produce summary
         summary_texts = list()
         self.model.to(self.device)
-        self.tokenizer.to(self.device)
         try:
             for tokens, upper_bound, lower_bound in \
                     zip(model_inputs, upper_bounds, lower_bounds):
@@ -222,7 +221,6 @@ class AbstractiveSummarizer:
                     if summary_text is None:
                         if count_regenerate <= max_generations:
                             regenerate = True
-                            log("Summary to short -> Regenerating!")
                             count_regenerate += 1
                             lower_bound = int(lower_bound * 1.5)
                             upper_bound = int(upper_bound * 1.5)
