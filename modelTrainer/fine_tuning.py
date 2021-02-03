@@ -4,6 +4,7 @@ script to fine tune a huggingface model
 
 import os
 import pickle
+from timelogging.timeLogLater import logOnce as log
 from transformers import Trainer, TrainingArguments
 import yaml
 from modelTrainer.abstractive_summarizer import AbstractiveSummarizer
@@ -94,6 +95,7 @@ def fine_tune_model(
         prediction_loss_only=True # loss for logging
     )
 
+    log("started training")
     # perform the training
     try:
         training_history = trainer.train()
