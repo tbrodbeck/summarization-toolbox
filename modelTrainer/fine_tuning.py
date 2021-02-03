@@ -69,7 +69,7 @@ def fine_tune_model(
         per_device_eval_batch_size=int(
             parameters["val_batch_size"]) if val_data else None,  # batch size for evaluation
         do_eval=bool(val_data),
-        eval_steps=500,
+        eval_steps=100,
         warmup_steps=500,  # number of warmup steps for learning rate scheduler
         weight_decay=0.01,  # strength of weight decay
         logging_dir=logs_path,  # directory for storing logs

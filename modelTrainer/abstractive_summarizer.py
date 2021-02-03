@@ -220,7 +220,7 @@ class AbstractiveSummarizer:
 
                     regenerate = False
                     if summary_text is None:
-                        if count_regenerate <= 0:
+                        if count_regenerate <= max_generations:
                             regenerate = True
                             log("Summary to short -> Regenerating!")
                             count_regenerate += 1
