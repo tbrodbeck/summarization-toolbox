@@ -5,8 +5,10 @@ from evaluator import analysis, evaluation_with_checkpoints
 import fire
 
 def analyze_evaluation_with_checkpoints(eval_path: str):
+  '''Creates an analysis in an Excel table file of a run. The results of the metrics of a run are evaluated and the mean and standard deviation of each checkpoint is calculated. This is saved in a `analysis.xlsx` in the eval_path
+    Args:
+      eval_path (str): path to the run result directory containing all the overview files. E.g. `modelTrainer/results/$MODELNAME/$RUNNR`'''
   evaluation_comparer = analysis.EvaluationComparer(eval_path)
   evaluation_comparer.save_dataframe()
-  # evaluation_comparer.plot_analysis() TODO
 
 fire.Fire(analyze_evaluation_with_checkpoints)

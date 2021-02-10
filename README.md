@@ -3,9 +3,9 @@
 ## Introduction
 This repository provides an end-to-end pipeline to fine-tune a 🤗-Summary-Model on your own corpus.<br>
 It is subdividet in those three parts:
-- Read and prepare data for training (_dataProvider_)
-- Fine tune a selected 🤗-Model on the provided data (_modelTrainer_)
-- Automated evaluation of the fine tuned model on validation set (_evaluator_)
+- [Data Provider](#data-provider): Preprocess and Tokenize data for training
+- [Model Trainer](#model-trainer): Fine tune a selected 🤗-Model on the provided data
+- [Evaluator](#evaluator): Automated evaluation of the fine tuned model on validation set
 
 The pipeline supports _german_ and _english_ texts to be summarized. For both languages a __T5__ model
 is used which can further be explored in the paper
@@ -16,9 +16,9 @@ Huggingface Models:
 - english: [t5-base](https://huggingface.co/t5-base)
 
 #### Process Description
-1. provide _source_ and _target_ files with matching text-summary-pairs. These are split and converted to the right format for the fine-tuning task.
-2. choose one of the supported languages and set training parameters via a config file. Then run the training on your data.
-3. evaluate the produced model checkpoints and compare them either by the `Rouge-L` or the specially developed `SemanticSimilarity` metric. You can also track the training metrics via [TensorBoard](https://www.tensorflow.org/tensorboard).
+1. Provide _source_ and _target_ files with matching text-summary-pairs. These are split and converted to the right format for the fine-tuning task.
+2. Choose one of the supported languages and set training parameters via a config file. Then run the training on your data.
+3. Evaluate the produced model checkpoints and compare them either by the `Rouge-L` or the specially developed `SemanticSimilarity` metric. You can also track the training metrics via [TensorBoard](https://www.tensorflow.org/tensorboard).
 
 #### Example
 The following example was produced by one of our german models which was fine-tuned on our specially scraped [Golem](https://www.golem.de/) corpus. <br>
@@ -32,7 +32,7 @@ Tamron hat mit dem 17-35 mm F2.8-4 Di OSD ein Weitwinkelzoom für Canon- und Nik
 ## Installation
 
 ```sh
-sh install_dependencies.sh
+./install_dependencies.sh
 ```
 
 ## Data Provider
@@ -67,12 +67,12 @@ test.target
 Use the Command Line Interface like this:
 
 ```sh
-python dataProvider/main.py $DATASETNAME $TOKENIZERNAME $MODELNAME <flags>
+bin/provide_data $DATASETNAME $TOKENIZERNAME $MODELNAME <flags>
 ```
 
 Example:
 ```sh
-python dataProvider/main.py golem WikinewsSum/t5-base-multi-de-wiki-news t5-base --create_splits=True --filtering=True
+bin/provide_data golem WikinewsSum/t5-base-multi-de-wiki-news t5-base --create_splits=True --filtering=True
 ```
 
 #### Flags
@@ -134,12 +134,12 @@ If you don't do so, this parameter defaults to _'fine_tuning.ini'_ (which could 
 Use the Command Line Interface like this:
 
 ```sh
-python bin/run_training $DATASETNAME $MODELNAME <flags>
+bin/run_training $DATASETNAME $MODELNAME <flags>
 ```
 
 Example:
 ```sh
-python bin/run_training golem WikinewsSum/t5-base-multi-de-wiki-news --filtered=False
+bin/run_training golem WikinewsSum/t5-base-multi-de-wiki-news --filtered=False
 ```
 
 ### Configurations
@@ -170,30 +170,32 @@ After the training the following final output files are saved in the _<model_ver
 - _config.json_
 - _training_args.bin_ (parameters for the [🤗-Trainer](https://huggingface.co/transformers/main_classes/trainer.html))
 - _pytorch_model.bin_ (model which can then be loaded for inference)
-- _model_info-yml_ (file with information used for evaluation)
+- _model_info.yml_ (file with information used for evaluation)
 
 ## Evaluator
 
-Performs evaluation on the test set for the fine-tuned model (produced in modelTraining).  
-There are different evaluation methods available
+Performs evaluation on the validation or test set for a fine-tuned model.
 
 ### Input
 
 To execute the __Evaluation__ you need to previously run the __Model Trainer__ module to generate a fine-tuned  🤗-Model in the right format and stored in the correct folder structure.
-These three files are required:
-- config.json
-- pytorch_model.bin
-- training_args.bin
+These four files are required:
+- _config.json_
+- _pytorch_model.bin_
+- _training_args.bin_
+- _model_info.yml_
 
-Since the model evaluation uses the __validation set__ created for the underlying training data you need to specify the `$DATASETNAME`.  
+Since the model evaluation uses the __validation set__ or __test set__ created from the underlying datasaet you need to specify the `$DATASETNAME`.  
 Additionally you can choose the fine-tuned 🤗-Model Checkpoints to compare by setting the `$RUNPATH` parameter. This path has to be the directory of the `checkpoint_folder` defined by the folder structure in the training section.
 
 #### Flags
 
-##### `--nr_samples=$SAMPLES`
+##### `--split_name=$SPLIT_NAME`
+Should be `train`, `val` or `test`. Default to __val__
+##### `--nr_samples=$NR_SAMPLES`
 Number of samples selected from the data set to evaluate the checkpoint on. Defaults to __10__
 
-##### `--metric_type=$METRIC`
+##### `--metric_type=$METRIC_TYPE`
 It can be chosen from the two metric types:
 - Rouge-L: set parameter to "Rouge"
 - Semantic Similarity: set parameter to "SemanticSimilarity"
@@ -205,12 +207,12 @@ Defaults to __Rouge__.
 Use the Command Line Interface like this:
 
 ```sh
-python bin/evaluate_with_checkpoints_and_compare $DATASETNAME $MODELNAME <flags>
+bin/evaluate_with_checkpoints_and_compare $RUN_PATH $DATASET_NAME <flags>
 ```
 
 Example:
 ```sh
-python bin/evaluate_with_checkpoints_and_compare golem WikinewsSum/t5-base-multi-de-wiki-news --nr_samples=1000 --metric_type=SemanticSimilarity
+bin/evaluate_with_checkpoints_and_compare golem WikinewsSum/t5-base-multi-de-wiki-news --split_name=train --nr_samples=1000 --metric_type=SemanticSimilarity
 ```
 
 ### Output
@@ -222,11 +224,10 @@ evaluator
         └── model_short_name
             └── model_version
                 └── checkpoint_folders
-                    └── metric_type-sample_name-folders
+                    └── metric_type-sample_name-split_name-folders
                         └── iteration-folders
                             - Overview.xlsx
-                ...
-                - analysis.xlsx
+                        - analysis.xlsx
 ```
 
 ## TensorBoard
@@ -236,7 +237,7 @@ To access the TensorBoard the library _tensorboard_ has to be installed (require
 ```sh
 tensorboard --logdir <tensorboard_log_dir>
 ```
-In the <tensorboard_log_dir> a _events.out.tfevents..._-file should exist. The directory is described by the folder structure in the training section.
+In the <tensorboard_log_dir> a _events.out.tfevents..._-file should exist. The default path is described by the folder structure in the training section.
 
 Example:
 ```sh

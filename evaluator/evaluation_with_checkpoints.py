@@ -46,7 +46,7 @@ def initialize_reference_model(language: str) -> AbstractiveSummarizer:
         "base"
     )
 
-def preprocess_data(dataset_name: str, nr_samples: int, tokenizer_name) -> Dict:
+def preprocess_data(dataset_name: str, split_name: str, nr_samples: int, tokenizer_name) -> Dict:
     data_set_dir = os.path.join(DATA_DIR, dataset_name)
     assert check_make_dir(data_set_dir), f"Data set '{dataset_name}' \
         not directory '{DATA_DIR}'. \
@@ -62,9 +62,9 @@ def preprocess_data(dataset_name: str, nr_samples: int, tokenizer_name) -> Dict:
         tensor_dir += "_filtered"
         assert (check_make_dir(tensor_dir) and os.listdir(tensor_dir)), f"Neither '{tensor_dir.rstrip('_filtered')} not '{tensor_dir}' does exist or it is empty!"
 
-    source_path = os.path.join(tensor_dir, "val_source.pt")
-    target_path = os.path.join(tensor_dir, "val_target.pt")
-    assert os.path.isfile(source_path) and os.path.isfile(target_path), f"Data pair '{source_path}' and '{target_path}' does not exist!"
+    source_path = os.path.join(tensor_dir, f"{split_name}_source.pt")
+    target_path = os.path.join(tensor_dir, f"{split_name}_target.pt")
+    assert os.path.isfile(source_path) and os.path.isfile(target_path), f"Data pair '{source_path}' or '{target_path}' does not exist!"
 
     data_dict = {
         "source": torch.load(open(source_path, "rb")),
@@ -72,12 +72,12 @@ def preprocess_data(dataset_name: str, nr_samples: int, tokenizer_name) -> Dict:
     }
     return limit_data(data_dict, nr_samples)
 
-def prepare_evaluator(tokenizer: object, metric_name: str, language: str, dataset_name: str, nr_samples: int, model_path: str, model_name: str) -> Evaluator:
+def prepare_evaluator(tokenizer: object, metric_name: str, language: str, dataset_name: str, split_name: str, nr_samples: int, model_path: str, model_name: str) -> Evaluator:
     metric = get_metric(metric_name, language)
-    data_dict = preprocess_data(dataset_name, nr_samples, model_name)
+    data_dict = preprocess_data(dataset_name, split_name, nr_samples, model_name)
     return Evaluator(data_dict, metric, tokenizer)
 
-def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples=10, metric_type='Rouge'):
+def evaluate_with_checkpoints(run_path: str, dataset_name: str, split_name: str, nr_samples=10, metric_type='Rouge'):
     """ Considers all checkpoints and final model for evaluation generation
 
     Args:
@@ -87,11 +87,11 @@ def evaluate_with_checkpoints(run_path: str, dataset_name: str, nr_samples=10, m
     """
     log('starting evaluation')
     model_info = eval_util.ModelInfoReader(run_path)
-    evaluation_basepath = f'evaluator/evaluations/{model_info.run_name}/{metric_type}{nr_samples}'
+    evaluation_basepath = f'evaluator/evaluations/{model_info.run_name}/{metric_type}{nr_samples}{split_name}'
     checkpoint_dirs = eval_util.get_subdirs(run_path)
     log('initializing models..')
     model = initialize_model(run_path, model_info.language)
-    evaluator = prepare_evaluator(model.tokenizer, metric_type, model_info.language, dataset_name, nr_samples, run_path, model_info.model_name)
+    evaluator = prepare_evaluator(model.tokenizer, metric_type, model_info.language, dataset_name, split_name, nr_samples, run_path, model_info.model_name)
 
     log('evaluating reference_model')
     reference_model = initialize_reference_model(model_info.language)
