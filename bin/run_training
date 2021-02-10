@@ -5,6 +5,18 @@ from modelTrainer.main import initialize_trainer
 import fire
 
 def run_training(dataset_name: str, model_name: str, filtered: bool = True, config_name: str = None):
+  """start the training process.
+
+  Args:
+      dataset_name (str): name of the dataset for which the converted texts are 
+      available as tensors and should be fine tuned on. (e.g.: 'golem')
+      model_name (str): huggingface which should be fine tuned
+      (e.g. 'WikinewsSum/t5-base-multi-de-wiki-news')
+      filtered (bool, optional): select if it should be trained on 'filtered' or 'unfiltered' set.
+      Defaults to True.
+      config_name (str, optional): File to provide training parameters
+      (e.g.: './modelTrainer/config/fine_tuning_config.ini'). Defaults to None.
+  """
   if config_name:
     initialize_trainer(dataset_name=dataset_name, model_name=model_name, filtered=filtered, config_name=config_name)
   else:
