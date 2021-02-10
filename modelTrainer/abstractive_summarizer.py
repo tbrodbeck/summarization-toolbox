@@ -132,7 +132,7 @@ class AbstractiveSummarizer:
                 truncation: bool = True,
                 upper_token_ratio: float = 0.20,
                 lower_token_ratio: float = 0.10,
-                max_generations: int = 1) -> Union[list, str]:
+                max_generations: int = 3) -> Union[list, str]:
         """inference from the summary model based on given texts
 
         Args:
@@ -219,7 +219,8 @@ class AbstractiveSummarizer:
                             summary_text, self.nlp)
 
                     regenerate = False
-                    if summary_text is None:
+                    if summary_text is None or \
+                        not any([summary_text.endswith(punct) for punct in [".", "!", "?"]]):
                         if count_regenerate <= max_generations:
                             regenerate = True
                             count_regenerate += 1
