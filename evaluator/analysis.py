@@ -54,14 +54,6 @@ class EvaluationComparer():
     print(self.analysis_df)
     log("saved to", self.analysis_table_path)
 
-  # def plot_analysis(self): TODO
-  #   for _, row in self.analysis_df.iterrows():
-  #     for metric in self.metrics_for_comparison:
-  #       log(row)
-  #       plt.plot(row['iterations'], row['fine_tuned_score_mean'])
-  #   plt.show()
-  #   plt.savefig(self.eval_path + '/plot.jpg')
-
 def convert_rows_to_sorted_df(row_list):
   df = pd.DataFrame(row_list)
   return df.sort_values('iterations', ignore_index=True)
