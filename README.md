@@ -145,7 +145,7 @@ bin/run_training golem WikinewsSum/t5-base-multi-de-wiki-news --filtered=False
 ### Configurations
 
 The pipeline is designed to inherit all customizable parameters from an _'.ini'_ file.
-It follows the structure that a component is defined by `[COMPONENT]` and the assigned parameters by `parameter = parameter_value` (as string).
+It follows the structure that a component is defined by `[COMPONENT]` and the assigned parameters by `parameter = parameter_value` (as string). There are two components, the model and training component. Each component can be configured with with multiple parameters (see fine_tuning.ini for a full list).
 Only the parameters in the provided _'fine_tuning_config.ini'_ file stored in the _config_ folders can be changed.
 
 ### Output
@@ -162,8 +162,8 @@ output_directory
                 └── tensorboard_file
 ```
 _<model_shortname>_ = Abbreviation for the chosen model  
-_<model_version>_ = Counts the versions (no override)  
-_<checkpoint_folder>_ = states of the model after a certain number of training steps  
+_<model_version>_ = Counts the versions of the fine tuned model (canbe seen as an id and makes sure you don't override any previously trained model)  
+_<checkpoint_folder>_ = contains model files after a certain number of training steps (checkpoints are saved after n training steps) 
 _<tensorboard_file>_ = saved training metrics for TensorBoard usage
 
 After the training the following final output files are saved in the _<model_version>_ folder:
