@@ -1,7 +1,7 @@
 #!python
 import sys
 sys.path.append(".")
-from evaluator.gui import run_gui
+from gui.gui import run_gui
 import fire
 
 fire.Fire(run_gui)
