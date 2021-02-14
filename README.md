@@ -230,6 +230,35 @@ evaluator
                         - analysis.xlsx
 ```
 
+## Graphical User Interface (GUI)
+A summarization model can be used for live-prediction in a GUI developed with [PyQT5](https://www.riverbankcomputing.com/software/pyqt/).
+
+![GUI](gui/gui.jpg "GUI")
+
+### Input
+
+All the GUI needs is either a directory containing a `pytorch_model.bin` file with a fine-tuned summary model of T5, or the flag `model_status` has to be set to `base` - then the base T5 model is used.
+
+#### Flags
+
+##### `--model_language=$MODEL_LANGUAGE`
+Language of the model to choose. Defaults to __german__
+##### `--model_status=MODEL_STATUS`
+Can be either `base` or `fine-tuned`. If it is `base` the `model_dir` will be ignored. Defaults to __fine-tuned__
+
+### Usage
+
+Use the Command Line Interface like this:
+
+```sh
+bin/run_gui $MODEL_DIR <flags>
+```
+
+Example:
+```sh
+bin/run_gui path/to/UI-Model/checkpoint-100000/ german fine-tuned
+```
+
 ## TensorBoard
 During the training a `TensorBoard` file is produced which can then be activated to track your training parameters and metrics afterwards in your localhost.
 To access the TensorBoard the library _tensorboard_ has to be installed (requirements.txt) and you can use the following CLI to activate it:

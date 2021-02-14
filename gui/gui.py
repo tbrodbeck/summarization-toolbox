@@ -12,7 +12,7 @@ from timelogging.timeLog import log
 
 class UI(QMainWindow):
   ''' GUI '''
-  def __init__(self, model_dir: str):
+  def __init__(self, model_dir: str, model_language: str, model_status: str):
       super().__init__()
       self.setAcceptDrops(True)
 
@@ -102,13 +102,13 @@ class UI(QMainWindow):
       self.central_widget.setLayout(central_layout)
 
       self.setCentralWidget(self.central_widget)
-      self.setWindowTitle('Sesame Street')
+      self.setWindowTitle(f"Text Summarizer: {model_dir} {model_language} {model_status}")
 
       if model_dir != 'dev':
         self.summarizer = AbstractiveSummarizer(
                                                                       model_dir,
-                                                                      "german",
-                                                                      status="fine-tuned"
+                                                                      model_language,
+                                                                      status=model_status
                                                                   )
       self.next_summary_position = 1
 
@@ -231,13 +231,15 @@ def sigint_handler(*args):
     """Handler for the SIGINT signal."""
     QApplication.quit()
 
-def run_gui(model_dir: str):
-  """execute the gui
+def run_gui(model_dir: str, model_language="german", model_status="fine-tuned"):
+  """Execute the Summarization GUI
   Args:
-      model_dir (str): directory of the summarization model to use
+      model_dir (str): directory of the fine-tuned summarization model to use
+      model_language (str, optional): Language of the model to choose. Defaults to "german".
+      model_status (str, optional): Can be either `base` or `fine-tuned`. If it is `base` the `model_dir` will be ignored. Defaults to "fine-tuned".
   """
   app = QApplication(sys.argv)
-  ui = UI(model_dir)
+  ui = UI(model_dir, model_language, model_status)
   ui.resize(800, 600)  # (width, length) default size in pixels
   ui.show()
   start_with_control_c_support(app)
