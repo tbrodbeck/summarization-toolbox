@@ -31,6 +31,7 @@ Tamron hat mit dem 17-35 mm F2.8-4 Di OSD ein Weitwinkelzoom für Canon- und Nik
 
 ## Installation
 
+Please setup a Python3 evironment with your virtual environment favorite tool. We tested it with Python `3.7.3`.
 ```sh
 sh ./install_dependencies.sh
 ```
